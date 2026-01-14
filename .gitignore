@@ -1,0 +1,60 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# =====================
+# Virtual Environments
+# =====================
+venv/
+.venv/
+env/
+ENV/
+
+# =====================
+# Jupyter / ML
+# =====================
+.ipynb_checkpoints/
+*.ipynb
+*.h5
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.joblib
+*.pkl
+
+# =====================
+# Data (adjust carefully)
+# =====================
+data/raw/
+data/processed/
+*.csv
+*.parquet
+
+# =====================
+# Logs & Artifacts
+# =====================
+logs/
+*.log
+runs/
+wandb/
+
+# =====================
+# OS / Editor
+# =====================
+.DS_Store
+.vscode/
+.idea/
+
+# =====================
+# Environment variables
+# =====================
+.env
+.env.*
