@@ -1,10 +1,51 @@
 import { useState, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import './App.css';
 import LandingPage from './pages/LandingPage';
 import UploadPage from './pages/UploadPage';
 import IngredientsPage from './pages/IngredientsPage';
 import RecipesPage from './pages/RecipesPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
+import LoginPage from './pages/LoginPage';
+import ProfilePage from './pages/ProfilePage';
+
+function Header({ onNavigate, currentPage }) {
+  const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
+
+  return (
+    <header className="app-header">
+      <div className="logo" onClick={() => onNavigate('landing')}>
+        Rasoi<span>AI</span>
+      </div>
+      <nav>
+        <button
+          className={currentPage === 'landing' ? 'active' : ''}
+          onClick={() => onNavigate('landing')}
+        >
+          Home
+        </button>
+        {isAuthenticated ? (
+          <div className="user-menu">
+            <button
+              className={currentPage === 'profile' ? 'active' : ''}
+              onClick={() => onNavigate('profile')}
+            >
+              Profile
+            </button>
+            <button className="logout-btn" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
+              Logout
+            </button>
+            <img src={user.picture} alt={user.name} className="nav-avatar" onClick={() => onNavigate('profile')} />
+          </div>
+        ) : (
+          <button className="login-btn" onClick={() => onNavigate('login')}>
+            Login
+          </button>
+        )}
+      </nav>
+    </header>
+  );
+}
 
 function App() {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -51,6 +92,10 @@ function App() {
             onNavigate={navigate}
           />
         );
+      case 'login':
+        return <LoginPage />;
+      case 'profile':
+        return <ProfilePage />;
       default:
         return <LandingPage onNavigate={navigate} />;
     }
@@ -58,7 +103,10 @@ function App() {
 
   return (
     <div className="app">
-      {renderPage()}
+      <Header onNavigate={navigate} currentPage={currentPage} />
+      <main className="app-content">
+        {renderPage()}
+      </main>
     </div>
   );
 }

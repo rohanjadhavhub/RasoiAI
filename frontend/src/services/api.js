@@ -106,6 +106,39 @@ export async function searchRecipes(ingredients) {
 }
 
 /**
+ * Helper for authenticated fetch requests
+ */
+async function authFetch(url, token, options = {}) {
+    const headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+    };
+
+    const response = await fetch(url, {
+        ...options,
+        headers,
+    });
+
+    if (!response.ok) {
+        if (response.status === 401) {
+            throw new Error('Unauthorized - please login again');
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'API request failed');
+    }
+
+    return response.json();
+}
+
+/**
+ * Fetch or create user profile in backend
+ */
+export async function fetchUserProfile(token) {
+    return authFetch(`${API_BASE}/auth/me`, token);
+}
+
+/**
  * Chat with AI assistant
  */
 export async function chat(sessionId, message, recipeContext = null) {

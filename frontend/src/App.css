@@ -1,10 +1,133 @@
 /* App-specific styles */
 
+/* ===== App Layout ===== */
 .app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Header */
+.app-content {
+  flex: 1;
+}
+
+/* ===== App Header / Navbar ===== */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 5%;
+  background: rgba(18, 18, 30, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.app-header .logo {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+.app-header .logo:hover {
+  opacity: 0.85;
+}
+
+.app-header .logo span {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.app-header nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-header nav button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  transition: all 0.25s ease;
+  font-family: inherit;
+}
+
+.app-header nav button:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.app-header nav button.active {
+  color: var(--primary);
+  background: rgba(255, 107, 53, 0.1);
+}
+
+/* User Menu (authenticated) */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+  object-fit: cover;
+}
+
+.nav-avatar:hover {
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.4);
+}
+
+/* Login CTA button */
+.app-header .login-btn {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+  color: white !important;
+  padding: 8px 22px !important;
+  border-radius: var(--radius-md) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+  transition: all 0.3s ease !important;
+}
+
+.app-header .login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%) !important;
+}
+
+/* Logout button */
+.app-header .logout-btn {
+  color: var(--error) !important;
+}
+
+.app-header .logout-btn:hover {
+  background: rgba(255, 82, 82, 0.1) !important;
+}
+
+/* ===== Legacy Header (kept for compatibility) ===== */
 .header {
   display: flex;
   align-items: center;
@@ -12,19 +135,11 @@
   padding: 20px 0;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
 .logo-icon {
   font-size: 2rem;
 }
 
-/* Page Layout */
+/* ===== Page Layout ===== */
 .page {
   min-height: 100vh;
   padding: 20px 0;
@@ -205,4 +320,33 @@
 
 .back-btn:hover {
   color: var(--primary);
+}
+
+/* ===== Header Responsive ===== */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 12px 4%;
+  }
+
+  .app-header .logo {
+    font-size: 1.3rem;
+  }
+
+  .app-header nav {
+    gap: 4px;
+  }
+
+  .app-header nav button {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+
+  .app-header .login-btn {
+    padding: 6px 14px !important;
+  }
+
+  .nav-avatar {
+    width: 28px;
+    height: 28px;
+  }
 }

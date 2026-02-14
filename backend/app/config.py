@@ -16,11 +16,17 @@ class Settings(BaseSettings):
     
     # Database
     database_path: str = "data/recipes.db"
+    user_database_path: str = "data/users.db"
+    
+    # Auth0 settings
+    auth0_domain: str = ""
+    auth0_api_audience: str = ""
+    auth0_algorithms: list = ["RS256"]
     
     # Gemini AI
     gemini_api_key: str = ""
-    gemini_vision_model: str = "gemini-2.5-flash"
-    gemini_text_model: str = "gemini-2.5-flash"
+    gemini_vision_model: str = "gemini-2.0-flash"
+    gemini_text_model: str = "gemini-2.0-flash"
     
     # Upload settings
     max_images: int = 3
