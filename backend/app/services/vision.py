@@ -1,19 +1,18 @@
 """
 Vision AI Service - Ingredient Recognition using Gemini
 """
-import base64
 import json
 from typing import List, Dict, Any
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 from app.config import get_settings
 from app.models import IdentifiedIngredient
 
 settings = get_settings()
 
-# Configure Gemini
-if settings.gemini_api_key:
-    genai.configure(api_key=settings.gemini_api_key)
+# Configure Gemini client
+client = genai.Client(api_key=settings.gemini_api_key) if settings.gemini_api_key else None
 
 
 VISION_PROMPT = """You are an expert at identifying Indian cooking ingredients from photos.
@@ -87,22 +86,21 @@ async def analyze_ingredients_from_images(image_data_list: List[bytes]) -> Dict[
         return _get_mock_ingredients()
     
     try:
-        # Create Gemini model
-        model = genai.GenerativeModel(settings.gemini_vision_model)
-        
         # Prepare image parts
         image_parts = []
         for img_data in image_data_list:
-            image_parts.append({
-                "mime_type": "image/jpeg",
-                "data": base64.b64encode(img_data).decode("utf-8")
-            })
+            image_parts.append(
+                types.Part.from_bytes(data=img_data, mime_type="image/jpeg")
+            )
         
         # Build content with images and prompt
         content = image_parts + [VISION_PROMPT]
         
         # Generate response
-        response = model.generate_content(content)
+        response = client.models.generate_content(
+            model=settings.gemini_vision_model,
+            contents=content
+        )
         response_text = response.text.strip()
         
         # Clean up response - remove markdown code blocks if present

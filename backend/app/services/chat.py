@@ -3,15 +3,14 @@ Chat Service - Conversational AI for recipe assistance
 """
 import json
 from typing import Dict, Any, List
-import google.generativeai as genai
+from google import genai
 
 from app.config import get_settings
 
 settings = get_settings()
 
-# Configure Gemini
-if settings.gemini_api_key:
-    genai.configure(api_key=settings.gemini_api_key)
+# Configure Gemini client
+client = genai.Client(api_key=settings.gemini_api_key) if settings.gemini_api_key else None
 
 
 CHAT_SYSTEM_PROMPT = """You are a helpful Indian cooking assistant named RasoiAI. You help users cook authentic Indian recipes based on their available ingredients.
@@ -57,8 +56,6 @@ async def get_chat_response(
         return _get_mock_response(message)
     
     try:
-        model = genai.GenerativeModel(settings.gemini_text_model)
-        
         # Build context for prompt
         ingredients = context.get("ingredients", [])
         selected_recipe = context.get("selected_recipe") or context.get("recipe_context", {})
@@ -78,13 +75,13 @@ Instructions: {selected_recipe.get('instruction', '')[:500]}...
             recipe_details=recipe_details or "No recipe selected yet"
         )
         
-        # Create chat
-        chat = model.start_chat(history=[])
-        
-        # Send system context first
+        # Send full prompt with context
         full_prompt = f"{system_prompt}\n\nUser question: {message}"
         
-        response = chat.send_message(full_prompt)
+        response = client.models.generate_content(
+            model=settings.gemini_text_model,
+            contents=full_prompt
+        )
         response_text = response.text.strip()
         
         # Generate suggestions based on context

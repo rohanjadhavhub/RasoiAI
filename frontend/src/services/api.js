@@ -158,3 +158,51 @@ export async function chat(sessionId, message, recipeContext = null) {
 
     return response.json();
 }
+
+
+// ─── Favourites ──────────────────────────────────────────
+
+export async function addFavourite(token, recipeId, recipeName) {
+    return authFetch(`${API_BASE}/favourites`, token, {
+        method: 'POST',
+        body: JSON.stringify({ recipe_id: recipeId, recipe_name: recipeName }),
+    });
+}
+
+export async function removeFavourite(token, recipeId) {
+    return authFetch(`${API_BASE}/favourites/${recipeId}`, token, {
+        method: 'DELETE',
+    });
+}
+
+export async function getFavourites(token) {
+    return authFetch(`${API_BASE}/favourites`, token);
+}
+
+export async function getFavouriteStatus(token, recipeId) {
+    return authFetch(`${API_BASE}/favourites/${recipeId}/status`, token);
+}
+
+
+// ─── Bookmarks ───────────────────────────────────────────
+
+export async function addBookmark(token, recipeId, recipeName) {
+    return authFetch(`${API_BASE}/bookmarks`, token, {
+        method: 'POST',
+        body: JSON.stringify({ recipe_id: recipeId, recipe_name: recipeName }),
+    });
+}
+
+export async function removeBookmark(token, recipeId) {
+    return authFetch(`${API_BASE}/bookmarks/${recipeId}`, token, {
+        method: 'DELETE',
+    });
+}
+
+export async function getBookmarks(token) {
+    return authFetch(`${API_BASE}/bookmarks`, token);
+}
+
+export async function getBookmarkStatus(token, recipeId) {
+    return authFetch(`${API_BASE}/bookmarks/${recipeId}/status`, token);
+}

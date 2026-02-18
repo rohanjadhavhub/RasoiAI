@@ -3,18 +3,15 @@ SQL Generator Service - Dynamic SQL query generation using Gemini
 """
 import json
 from typing import List, Dict, Any, Optional
-import google.generativeai as genai
-
+from google import genai
 
 from app.config import get_settings
 from app.database import get_database
 
 settings = get_settings()
 
-# Configure Gemini
-
-if settings.gemini_api_key:
-    genai.configure(api_key=settings.gemini_api_key)
+# Configure Gemini client
+client = genai.Client(api_key=settings.gemini_api_key) if settings.gemini_api_key else None
 
 
 SQL_GENERATION_PROMPT = """You are a SQL expert specializing in recipe search queries.
@@ -66,14 +63,15 @@ async def generate_recipe_query(
         return _generate_basic_query(ingredients)
     
     try:
-        model = genai.GenerativeModel(settings.gemini_text_model)
-        
         prompt = SQL_GENERATION_PROMPT.format(
             ingredients=ingredients,
             preferences=preferences or {}
         )
         
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model=settings.gemini_text_model,
+            contents=prompt
+        )
         query = response.text.strip()
         
         # Clean up response

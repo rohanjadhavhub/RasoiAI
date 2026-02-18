@@ -95,7 +95,7 @@ function App() {
       case 'login':
         return <LoginPage />;
       case 'profile':
-        return <ProfilePage />;
+        return <ProfilePage onNavigate={navigate} />;
       default:
         return <LandingPage onNavigate={navigate} />;
     }

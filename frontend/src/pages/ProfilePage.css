@@ -11,7 +11,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
     animation: slideUp 0.6s ease-out;
@@ -132,4 +132,167 @@
     100% {
         transform: rotate(360deg);
     }
+}
+
+/* ─── History Tabs ────────────────────────────────────── */
+
+.history-section {
+    margin-top: 2.5rem;
+}
+
+.history-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: #888;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ccc;
+}
+
+.tab-btn.active {
+    background: rgba(255, 140, 0, 0.12);
+    border-color: rgba(255, 140, 0, 0.3);
+    color: #ff8c00;
+    font-weight: 600;
+}
+
+.tab-count {
+    background: rgba(255, 140, 0, 0.25);
+    color: #ff8c00;
+    padding: 0.1rem 0.55rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* ─── Recipe Cards ────────────────────────────────────── */
+
+.saved-recipes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.saved-recipe-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.2s ease;
+}
+
+.saved-recipe-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.saved-recipe-info {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    cursor: pointer;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.saved-recipe-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.saved-recipe-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.saved-recipe-name {
+    font-size: 0.95rem;
+    color: #eee;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+.saved-recipe-date {
+    font-size: 0.78rem;
+    color: #666;
+    margin: 0.15rem 0 0;
+}
+
+.remove-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 70, 70, 0.1);
+    color: #ff6b6b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+.remove-btn:hover {
+    background: rgba(255, 70, 70, 0.25);
+    transform: scale(1.1);
+}
+
+.remove-btn svg {
+    flex-shrink: 0;
+}
+
+/* ─── Empty & Loading States ──────────────────────────── */
+
+.history-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: #666;
+}
+
+.empty-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.history-empty p {
+    margin: 0.25rem 0;
+}
+
+.empty-hint {
+    font-size: 0.82rem;
+    color: #555;
+}
+
+.history-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #888;
 }

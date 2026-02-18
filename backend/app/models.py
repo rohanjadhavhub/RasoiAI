@@ -123,3 +123,20 @@ class SessionData(BaseModel):
     preferences: Optional[UserPreferences] = None
     selected_recipe: Optional[RecipeBase] = None
     conversation_history: List[Dict[str, str]] = []
+
+
+# ─── User History Models ──────────────────────────────────
+
+
+class RecipeActionRequest(BaseModel):
+    """Request to add a recipe to favourites or bookmarks"""
+    recipe_id: int
+    recipe_name: Optional[str] = None
+
+
+class SavedRecipeResponse(BaseModel):
+    """A single saved recipe entry"""
+    recipe_id: int
+    recipe_name: Optional[str] = None
+    created_at: str
+

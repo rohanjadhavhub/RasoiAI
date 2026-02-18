@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 from app.config import get_settings
-from app.routes import images, recipes, chat, auth
+from app.routes import images, recipes, chat, auth, user_history
 
 settings = get_settings()
 
@@ -42,6 +42,7 @@ app.include_router(images.router, prefix="/api", tags=["Images"])
 app.include_router(recipes.router, prefix="/api", tags=["Recipes"])
 app.include_router(chat.router, prefix="/api", tags=["Chat"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(user_history.router, prefix="/api", tags=["User History"])
 
 
 @app.get("/")

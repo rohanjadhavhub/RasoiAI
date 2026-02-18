@@ -1,11 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import './RecipeDetailPage.css';
-import { chat } from '../services/api';
+import {
+    chat,
+    addFavourite,
+    removeFavourite,
+    getFavouriteStatus,
+    addBookmark,
+    removeBookmark,
+    getBookmarkStatus,
+} from '../services/api';
 
 function RecipeDetailPage({ recipe, sessionId, onNavigate }) {
+    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [chatInput, setChatInput] = useState('');
     const [chatMessages, setChatMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isFav, setIsFav] = useState(false);
+    const [isBook, setIsBook] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
+
+    // Fetch favourite/bookmark status when recipe loads
+    useEffect(() => {
+        const fetchStatus = async () => {
+            if (!isAuthenticated || !recipe) return;
+            try {
+                const token = await getAccessTokenSilently();
+                const [favRes, bookRes] = await Promise.all([
+                    getFavouriteStatus(token, recipe.recipe_id),
+                    getBookmarkStatus(token, recipe.recipe_id),
+                ]);
+                setIsFav(favRes.is_favourite);
+                setIsBook(bookRes.is_bookmark);
+            } catch (err) {
+                console.error('Failed to fetch status:', err);
+            }
+        };
+        fetchStatus();
+    }, [isAuthenticated, recipe, getAccessTokenSilently]);
 
     if (!recipe) {
         return (
@@ -22,13 +54,63 @@ function RecipeDetailPage({ recipe, sessionId, onNavigate }) {
         );
     }
 
+    const toggleFavourite = async () => {
+        if (!isAuthenticated || actionLoading) return;
+        setActionLoading(true);
+        try {
+            const token = await getAccessTokenSilently();
+            if (isFav) {
+                await removeFavourite(token, recipe.recipe_id);
+            } else {
+                await addFavourite(token, recipe.recipe_id, recipe.recipe);
+            }
+            setIsFav(!isFav);
+        } catch (err) {
+            console.error('Favourite toggle failed:', err);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const toggleBookmark = async () => {
+        if (!isAuthenticated || actionLoading) return;
+        setActionLoading(true);
+        try {
+            const token = await getAccessTokenSilently();
+            if (isBook) {
+                await removeBookmark(token, recipe.recipe_id);
+            } else {
+                await addBookmark(token, recipe.recipe_id, recipe.recipe);
+            }
+            setIsBook(!isBook);
+        } catch (err) {
+            console.error('Bookmark toggle failed:', err);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     // Parse instructions into steps
     const parseInstructions = (instruction) => {
         if (!instruction) return [];
-        return instruction
-            .split(/\d+\.\s+/)
-            .filter(step => step.trim())
-            .map(step => step.trim().replace(/\.$/, ''));
+        let text = instruction.trim();
+
+        // Normalise common separators into newlines
+        // Handles "1. …", "1) …", "Step 1: …", "Step 1 - …"
+        text = text.replace(/(?:^|\n)\s*(?:step\s*)?\d+[.):\-]\s*/gi, '\n');
+
+        // Split on newlines first
+        let parts = text.split(/\n+/).map(s => s.trim()).filter(Boolean);
+
+        // If still only one chunk, try period-space-uppercase boundaries
+        if (parts.length <= 1) {
+            parts = text.split(/\.\s+/).map(s => s.trim()).filter(Boolean);
+        }
+
+        // Clean each step: strip leading bullets/dashes, trailing period
+        return parts.map(s =>
+            s.replace(/^[-•*>]+\s*/, '').replace(/\.$/, '').trim()
+        ).filter(Boolean);
     };
 
     const steps = parseInstructions(recipe.instruction);
@@ -79,6 +161,31 @@ function RecipeDetailPage({ recipe, sessionId, onNavigate }) {
                                 <span className="meta-item">🍽️ 4 servings</span>
                                 <span className="meta-item">🌶️ Medium</span>
                             </div>
+
+                            {isAuthenticated && (
+                                <div className="recipe-actions">
+                                    <button
+                                        className={`action-btn fav-btn ${isFav ? 'active' : ''}`}
+                                        onClick={toggleFavourite}
+                                        disabled={actionLoading}
+                                        title={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                                    >
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill={isFav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        className={`action-btn book-btn ${isBook ? 'active' : ''}`}
+                                        onClick={toggleBookmark}
+                                        disabled={actionLoading}
+                                        title={isBook ? 'Remove bookmark' : 'Save for later'}
+                                    >
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill={isBook ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Ingredients */}
@@ -96,14 +203,18 @@ function RecipeDetailPage({ recipe, sessionId, onNavigate }) {
 
                         {/* Instructions */}
                         <div className="recipe-section">
-                            <h2>👨‍🍳 Instructions</h2>
+                            <h2>Instructions</h2>
                             <div className="instructions-list">
-                                {steps.map((step, i) => (
-                                    <div key={i} className="instruction-step">
-                                        <span className="step-number">{i + 1}</span>
-                                        <p>{step}</p>
-                                    </div>
-                                ))}
+                                {steps.length > 0 ? (
+                                    steps.map((step, i) => (
+                                        <div key={i} className="instruction-step">
+                                            <span className="step-number">{i + 1}</span>
+                                            <p>{step}</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="instruction-fallback">{recipe.instruction}</p>
+                                )}
                             </div>
                         </div>
 

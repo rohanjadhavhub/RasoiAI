@@ -80,12 +80,14 @@ async def _verify_opaque_token(token: str) -> Dict[str, Any]:
     Validate an opaque access token by calling Auth0's /userinfo endpoint.
     Auth0 validates the token and returns user profile claims.
     """
+    logger.info(f"Verifying opaque token via /userinfo (token length={len(token)})")
     async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(
             USERINFO_URL,
             headers={"Authorization": f"Bearer {token}"},
         )
 
+    logger.info(f"/userinfo response: status={resp.status_code}")
     if resp.status_code == 200:
         data = resp.json()
         # Normalize to match JWT claim format
@@ -98,6 +100,7 @@ async def _verify_opaque_token(token: str) -> Dict[str, Any]:
             "email_verified": data.get("email_verified", False),
         }
     elif resp.status_code == 401:
+        logger.error(f"/userinfo 401 body: {resp.text}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired or is invalid",
@@ -116,6 +119,7 @@ async def verify_token(token: str) -> Dict[str, Any]:
     - If it's a JWT, verify locally using JWKS.
     - If it's opaque, validate via Auth0 /userinfo endpoint.
     """
+    logger.info(f"verify_token called: is_jwt={_is_jwt(token)}, token_prefix={token[:20]}...")
     if _is_jwt(token):
         try:
             return _verify_jwt(token)
@@ -132,14 +136,12 @@ async def verify_token(token: str) -> Dict[str, Any]:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token issuer",
             )
-        except jwt.PyJWKClientError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Unable to fetch signing keys",
-            )
-        except jwt.InvalidTokenError:
+        except jwt.PyJWKClientError as e:
+            # JWKS fetch failed — fall through to /userinfo
+            logger.warning(f"JWKS fetch failed ({e}), trying /userinfo fallback")
+        except jwt.InvalidTokenError as e:
             # Token looks like JWT but can't be decoded — try /userinfo
-            logger.warning("JWT decode failed, trying /userinfo fallback")
+            logger.warning(f"JWT decode failed ({e}), trying /userinfo fallback")
 
     # Opaque token or JWT fallback — validate via Auth0
     return await _verify_opaque_token(token)

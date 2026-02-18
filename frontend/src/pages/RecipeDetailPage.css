@@ -37,6 +37,60 @@
     font-size: 0.95rem;
 }
 
+/* ─── Favourite & Bookmark Buttons ────────────────────── */
+
+.recipe-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    color: #999;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.action-btn:hover:not(:disabled) svg {
+    transform: scale(1.15);
+}
+
+.fav-btn.active {
+    background: rgba(255, 70, 70, 0.15);
+    border-color: rgba(255, 70, 70, 0.3);
+    color: #ff6b6b;
+}
+
+.book-btn.active {
+    background: rgba(255, 180, 0, 0.15);
+    border-color: rgba(255, 180, 0, 0.3);
+    color: #ffb400;
+}
+
 .recipe-section {
     margin-bottom: 32px;
 }
@@ -69,29 +123,52 @@
 .instructions-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .instruction-step {
     display: flex;
+    align-items: flex-start;
     gap: 16px;
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--primary);
+    transition: background 0.2s ease;
+}
+
+.instruction-step:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .step-number {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
     background: var(--primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 0.8rem;
     flex-shrink: 0;
+    margin-top: 1px;
 }
 
 .instruction-step p {
-    padding-top: 4px;
-    line-height: 1.6;
+    line-height: 1.7;
+    color: var(--text-secondary, #ccc);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.instruction-fallback {
+    line-height: 1.8;
+    color: var(--text-secondary, #ccc);
+    font-size: 0.95rem;
+    white-space: pre-wrap;
 }
 
 /* Tips */

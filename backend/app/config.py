@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     
     # Gemini AI
     gemini_api_key: str = ""
-    gemini_vision_model: str = "gemini-2.0-flash"
-    gemini_text_model: str = "gemini-2.0-flash"
+    gemini_vision_model: str = "gemini-2.5-flash"
+    gemini_text_model: str = "gemini-2.5-flash"
     
     # Upload settings
     max_images: int = 3
