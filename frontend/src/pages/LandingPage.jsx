@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import './LandingPage.css';
 
-function LandingPage({ onNavigate }) {
+function LandingPage() {
+    const navigate = useNavigate();
+
     return (
         <div className="landing-page">
             <div className="landing-hero">
@@ -38,7 +41,7 @@ function LandingPage({ onNavigate }) {
                         <div className="hero-actions">
                             <button
                                 className="btn btn-primary btn-large"
-                                onClick={() => onNavigate('upload')}
+                                onClick={() => navigate('/upload')}
                             >
                                 <span>🍳</span>
                                 Start Cooking
@@ -46,7 +49,7 @@ function LandingPage({ onNavigate }) {
 
                             <button
                                 className="btn btn-secondary"
-                                onClick={() => onNavigate('upload')}
+                                onClick={() => navigate('/upload')}
                             >
                                 Learn More
                             </button>

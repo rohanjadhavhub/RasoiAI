@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom';
 import './App.css';
 import LandingPage from './pages/LandingPage';
 import UploadPage from './pages/UploadPage';
@@ -9,38 +9,40 @@ import RecipeDetailPage from './pages/RecipeDetailPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 
-function Header({ onNavigate, currentPage }) {
-  const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
+function Header() {
+  const { isAuthenticated, logout, user } = useAuth0();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <header className="app-header">
-      <div className="logo" onClick={() => onNavigate('landing')}>
+      <div className="logo" onClick={() => navigate('/')}>
         Rasoi<span>AI</span>
       </div>
       <nav>
-        <button
-          className={currentPage === 'landing' ? 'active' : ''}
-          onClick={() => onNavigate('landing')}
+        <Link
+          className={location.pathname === '/' ? 'active' : ''}
+          to="/"
         >
           Home
-        </button>
+        </Link>
         {isAuthenticated ? (
           <div className="user-menu">
-            <button
-              className={currentPage === 'profile' ? 'active' : ''}
-              onClick={() => onNavigate('profile')}
+            <Link
+              className={location.pathname === '/profile' ? 'active' : ''}
+              to="/profile"
             >
               Profile
-            </button>
+            </Link>
             <button className="logout-btn" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
               Logout
             </button>
-            <img src={user.picture} alt={user.name} className="nav-avatar" onClick={() => onNavigate('profile')} />
+            <img src={user.picture} alt={user.name} className="nav-avatar" onClick={() => navigate('/profile')} />
           </div>
         ) : (
-          <button className="login-btn" onClick={() => onNavigate('login')}>
+          <Link className="login-btn" to="/login">
             Login
-          </button>
+          </Link>
         )}
       </nav>
     </header>
@@ -48,64 +50,20 @@ function Header({ onNavigate, currentPage }) {
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('landing');
-  const [sessionId, setSessionId] = useState(null);
-  const [ingredients, setIngredients] = useState([]);
-  const [recommendations, setRecommendations] = useState(null);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
-
-  const navigate = useCallback((page, data = {}) => {
-    if (data.sessionId) setSessionId(data.sessionId);
-    if (data.ingredients) setIngredients(data.ingredients);
-    if (data.recommendations) setRecommendations(data.recommendations);
-    if (data.recipe) setSelectedRecipe(data.recipe);
-    setCurrentPage(page);
-  }, []);
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'landing':
-        return <LandingPage onNavigate={navigate} />;
-      case 'upload':
-        return <UploadPage onNavigate={navigate} />;
-      case 'ingredients':
-        return (
-          <IngredientsPage
-            sessionId={sessionId}
-            ingredients={ingredients}
-            onNavigate={navigate}
-          />
-        );
-      case 'recipes':
-        return (
-          <RecipesPage
-            sessionId={sessionId}
-            recommendations={recommendations}
-            onNavigate={navigate}
-          />
-        );
-      case 'recipe-detail':
-        return (
-          <RecipeDetailPage
-            recipe={selectedRecipe}
-            sessionId={sessionId}
-            onNavigate={navigate}
-          />
-        );
-      case 'login':
-        return <LoginPage />;
-      case 'profile':
-        return <ProfilePage onNavigate={navigate} />;
-      default:
-        return <LandingPage onNavigate={navigate} />;
-    }
-  };
-
   return (
     <div className="app">
-      <Header onNavigate={navigate} currentPage={currentPage} />
+      <Header />
       <main className="app-content">
-        {renderPage()}
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/upload" element={<UploadPage />} />
+          <Route path="/ingredients" element={<IngredientsPage />} />
+          <Route path="/recipes" element={<RecipesPage />} />
+          <Route path="/recipe" element={<RecipeDetailPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="*" element={<LandingPage />} />
+        </Routes>
       </main>
     </div>
   );

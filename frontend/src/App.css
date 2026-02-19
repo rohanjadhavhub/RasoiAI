@@ -56,7 +56,8 @@
   gap: 8px;
 }
 
-.app-header nav button {
+.app-header nav button,
+.app-header nav a {
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -67,14 +68,17 @@
   border-radius: var(--radius-sm);
   transition: all 0.25s ease;
   font-family: inherit;
+  text-decoration: none;
 }
 
-.app-header nav button:hover {
+.app-header nav button:hover,
+.app-header nav a:hover {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.06);
 }
 
-.app-header nav button.active {
+.app-header nav button.active,
+.app-header nav a.active {
   color: var(--primary);
   background: rgba(255, 107, 53, 0.1);
 }
@@ -336,7 +340,8 @@
     gap: 4px;
   }
 
-  .app-header nav button {
+  .app-header nav button,
+  .app-header nav a {
     font-size: 0.85rem;
     padding: 6px 10px;
   }

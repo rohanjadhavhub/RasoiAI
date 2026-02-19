@@ -1,5 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     fetchUserProfile,
     getFavourites,
@@ -9,7 +10,8 @@ import {
 } from '../services/api';
 import './ProfilePage.css';
 
-const ProfilePage = ({ onNavigate }) => {
+const ProfilePage = () => {
+    const navigate = useNavigate();
     const { user, getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
     const [dbUser, setDbUser] = useState(null);
     const [error, setError] = useState(null);
@@ -70,16 +72,16 @@ const ProfilePage = ({ onNavigate }) => {
     };
 
     const handleRecipeClick = (item) => {
-        if (onNavigate) {
-            onNavigate('recipe-detail', {
+        navigate('/recipe', {
+            state: {
                 recipe: {
                     recipe_id: item.recipe_id,
                     recipe: item.recipe_name,
                     ingredients: '',
                     instruction: '',
                 },
-            });
-        }
+            },
+        });
     };
 
     if (isLoading || isSyncing) {

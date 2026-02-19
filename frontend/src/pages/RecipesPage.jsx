@@ -1,12 +1,16 @@
+import { useNavigate, useLocation } from 'react-router-dom';
 import './RecipesPage.css';
 
-function RecipesPage({ sessionId, recommendations, onNavigate }) {
+function RecipesPage() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { recommendations, sessionId } = location.state || {};
     const { ready_to_cook = [], almost_there = [], need_shopping = [] } = recommendations || {};
 
     const RecipeCard = ({ recipe, variant = 'default' }) => (
         <div
             className={`recipe-card card ${variant}`}
-            onClick={() => onNavigate('recipe-detail', { recipe })}
+            onClick={() => navigate('/recipe', { state: { recipe, sessionId } })}
         >
             <div className="recipe-card-header">
                 <div>
@@ -39,7 +43,7 @@ function RecipesPage({ sessionId, recommendations, onNavigate }) {
     return (
         <div className="page recipes-page">
             <div className="container">
-                <button className="back-btn" onClick={() => onNavigate('upload')}>
+                <button className="back-btn" onClick={() => navigate('/upload')}>
                     ← Start Over
                 </button>
 
@@ -56,7 +60,7 @@ function RecipesPage({ sessionId, recommendations, onNavigate }) {
                             <p>Try adding more ingredients or different ones</p>
                             <button
                                 className="btn btn-primary"
-                                onClick={() => onNavigate('upload')}
+                                onClick={() => navigate('/upload')}
                             >
                                 Try Again
                             </button>

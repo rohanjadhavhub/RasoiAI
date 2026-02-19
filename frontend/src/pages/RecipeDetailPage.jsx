@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './RecipeDetailPage.css';
 import {
     chat,
@@ -11,7 +12,11 @@ import {
     getBookmarkStatus,
 } from '../services/api';
 
-function RecipeDetailPage({ recipe, sessionId, onNavigate }) {
+function RecipeDetailPage() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { recipe, sessionId } = location.state || {};
+
     const { isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [chatInput, setChatInput] = useState('');
     const [chatMessages, setChatMessages] = useState([]);
@@ -45,7 +50,7 @@ function RecipeDetailPage({ recipe, sessionId, onNavigate }) {
                 <div className="container">
                     <div className="empty-state">
                         <p>No recipe selected</p>
-                        <button className="btn btn-primary" onClick={() => onNavigate('recipes')}>
+                        <button className="btn btn-primary" onClick={() => navigate('/recipes')}>
                             Back to Recipes
                         </button>
                     </div>
@@ -147,7 +152,7 @@ function RecipeDetailPage({ recipe, sessionId, onNavigate }) {
     return (
         <div className="page recipe-detail-page">
             <div className="container">
-                <button className="back-btn" onClick={() => onNavigate('recipes')}>
+                <button className="back-btn" onClick={() => navigate(-1)}>
                     ← Back to Recipes
                 </button>
 

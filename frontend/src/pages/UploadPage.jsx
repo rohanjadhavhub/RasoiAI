@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './UploadPage.css';
 import { uploadImages, analyzeIngredients, searchRecipes } from '../services/api';
 
-function UploadPage({ onNavigate }) {
+function UploadPage() {
+    const navigate = useNavigate();
     const [files, setFiles] = useState([]);
     const [previews, setPreviews] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -60,9 +62,11 @@ function UploadPage({ onNavigate }) {
 
             // Navigate to ingredients confirmation
             const ingredientNames = analysisResult.identified_ingredients.map(i => i.name);
-            onNavigate('ingredients', {
-                sessionId,
-                ingredients: ingredientNames
+            navigate('/ingredients', {
+                state: {
+                    sessionId,
+                    ingredients: ingredientNames
+                }
             });
         } catch (err) {
             setError(err.message || 'Failed to analyze images');
@@ -91,11 +95,13 @@ function UploadPage({ onNavigate }) {
             const almost = result.recipes.filter(r => r.readiness === 'ALMOST_THERE');
             const shopping = result.recipes.filter(r => r.readiness === 'NEED_SHOPPING');
 
-            onNavigate('recipes', {
-                recommendations: {
-                    ready_to_cook: ready,
-                    almost_there: almost,
-                    need_shopping: shopping
+            navigate('/recipes', {
+                state: {
+                    recommendations: {
+                        ready_to_cook: ready,
+                        almost_there: almost,
+                        need_shopping: shopping
+                    }
                 }
             });
         } catch (err) {
@@ -108,7 +114,7 @@ function UploadPage({ onNavigate }) {
     return (
         <div className="page upload-page">
             <div className="container">
-                <button className="back-btn" onClick={() => onNavigate('landing')}>
+                <button className="back-btn" onClick={() => navigate('/')}>
                     ← Back
                 </button>
 

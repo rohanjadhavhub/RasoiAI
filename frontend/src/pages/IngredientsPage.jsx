@@ -1,8 +1,13 @@
 import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './IngredientsPage.css';
 import { confirmIngredients, getRecommendations } from '../services/api';
 
-function IngredientsPage({ sessionId, ingredients: initialIngredients, onNavigate }) {
+function IngredientsPage() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { sessionId, ingredients: initialIngredients } = location.state || {};
+
     const [ingredients, setIngredients] = useState(initialIngredients || []);
     const [newIngredient, setNewIngredient] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +40,7 @@ function IngredientsPage({ sessionId, ingredients: initialIngredients, onNavigat
             // Get recommendations
             const recommendations = await getRecommendations(sessionId);
 
-            onNavigate('recipes', { recommendations });
+            navigate('/recipes', { state: { recommendations, sessionId } });
         } catch (err) {
             setError(err.message || 'Failed to get recommendations');
         } finally {
@@ -46,7 +51,7 @@ function IngredientsPage({ sessionId, ingredients: initialIngredients, onNavigat
     return (
         <div className="page ingredients-page">
             <div className="container">
-                <button className="back-btn" onClick={() => onNavigate('upload')}>
+                <button className="back-btn" onClick={() => navigate('/upload')}>
                     ← Back
                 </button>
 
