@@ -113,6 +113,8 @@ class ChatResponse(BaseModel):
     """Chat response"""
     response: str
     suggestions: List[str] = []
+    response_type: str = "chat"
+    updated_recipe: Optional[Dict[str, Any]] = None
 
 
 # Session models

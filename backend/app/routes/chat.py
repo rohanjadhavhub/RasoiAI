@@ -35,7 +35,9 @@ async def chat(request: ChatRequest):
         response = await get_chat_response(request.message, context)
         return ChatResponse(
             response=response["response"],
-            suggestions=response.get("suggestions", [])
+            suggestions=response.get("suggestions", []),
+            response_type=response.get("response_type", "chat"),
+            updated_recipe=response.get("updated_recipe"),
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
