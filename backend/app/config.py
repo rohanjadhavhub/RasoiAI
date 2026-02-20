@@ -14,9 +14,8 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     debug: bool = True
     
-    # Database
-    database_path: str = "data/recipes.db"
-    user_database_path: str = "data/users.db"
+    # Database — Neon PostgreSQL (required)
+    database_url: str = ""
     
     # Auth0 settings
     auth0_domain: str = ""

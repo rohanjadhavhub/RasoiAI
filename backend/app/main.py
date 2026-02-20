@@ -56,6 +56,17 @@ async def root():
     }
 
 
+@app.get("/db-test")
+async def db_test():
+    """Test PostgreSQL (Neon) connectivity."""
+    from app.database import get_database
+    try:
+        db = get_database()
+        count = db.get_recipe_count()
+        return {"status": "connected", "recipe_count": count}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
