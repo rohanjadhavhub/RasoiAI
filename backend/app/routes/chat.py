@@ -3,7 +3,7 @@ Chat Routes - Conversational AI for recipe assistance
 """
 from fastapi import APIRouter, HTTPException
 
-from app.models import ChatRequest, ChatResponse
+from app.schemas import ChatRequest, ChatResponse
 from app.services.chat import get_chat_response
 
 router = APIRouter()
@@ -17,7 +17,7 @@ async def chat(request: ChatRequest):
     """
     Chat with AI about recipes
     """
-    # Get session context if available
+    # Get session context 
     context = {}
     if request.session_id in sessions:
         session = sessions[request.session_id]
@@ -51,7 +51,7 @@ async def select_recipe(session_id: str, recipe_id: int):
     if session_id not in sessions:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    from app.database import get_database
+    from app.db import get_database
     db = get_database()
     recipe = db.get_recipe_by_id(recipe_id)
     

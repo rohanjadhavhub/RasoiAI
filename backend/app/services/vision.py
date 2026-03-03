@@ -6,8 +6,8 @@ from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 
-from app.config import get_settings
-from app.models import IdentifiedIngredient
+from app.core.config import get_settings
+from app.schemas import IdentifiedIngredient
 
 settings = get_settings()
 

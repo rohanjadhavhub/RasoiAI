@@ -1,10 +1,11 @@
+""" 
+RasoiAI Recipe Database — PostgreSQL (Neon) via psycopg2
 """
-Database Operations for RasoiAI — PostgreSQL (Neon) only
-"""
+
 import psycopg2
 from typing import List, Dict, Any, Optional
 
-from app.config import get_settings
+from app.core.config import get_settings
 
 
 class RecipeDatabase:

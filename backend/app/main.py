@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from app.config import get_settings
+from app.core.config import get_settings
 from app.routes import images, recipes, chat, auth, user_history
 
 settings = get_settings()
@@ -59,7 +59,7 @@ async def root():
 @app.get("/db-test")
 async def db_test():
     """Test PostgreSQL (Neon) connectivity."""
-    from app.database import get_database
+    from app.db import get_database
     try:
         db = get_database()
         count = db.get_recipe_count()

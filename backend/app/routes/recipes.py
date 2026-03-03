@@ -4,8 +4,8 @@ Recipe Routes - Search and Recommendations
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query
 
-from app.database import get_database
-from app.models import (
+from app.db import get_database
+from app.schemas import (
     ConfirmIngredientsRequest,
     GetRecommendationsRequest,
     RecipeRecommendations,

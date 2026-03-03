@@ -5,7 +5,7 @@ from typing import Dict, Any
 from fastapi import APIRouter, Depends
 
 from app.services.auth import get_current_user
-from app.user_database import get_user_database
+from app.db import get_user_database
 
 router = APIRouter()
 

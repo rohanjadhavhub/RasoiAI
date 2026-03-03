@@ -5,7 +5,7 @@ import json
 from typing import Dict, Any, List
 from google import genai
 
-from app.config import get_settings
+from app.core.config import get_settings
 
 settings = get_settings()
 

@@ -5,8 +5,8 @@ import json
 from typing import List, Dict, Any, Optional
 from google import genai
 
-from app.config import get_settings
-from app.database import get_database
+from app.core.config import get_settings
+from app.db import get_database
 
 settings = get_settings()
 

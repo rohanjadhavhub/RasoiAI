@@ -9,14 +9,14 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from PIL import Image
 import io
 
-from app.config import get_settings
-from app.models import IngredientAnalysisResponse, IdentifiedIngredient
+from app.core.config import get_settings
+from app.schemas import IngredientAnalysisResponse, IdentifiedIngredient
 from app.services.vision import analyze_ingredients_from_images
 
 router = APIRouter()
 settings = get_settings()
 
-# Simple in-memory session storage (use Redis in production)
+
 sessions = {}
 
 

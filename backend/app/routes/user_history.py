@@ -5,8 +5,8 @@ from typing import Dict, Any, List
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.services.auth import get_current_user
-from app.user_database import get_user_database
-from app.models import RecipeActionRequest, SavedRecipeResponse
+from app.db import get_user_database
+from app.schemas import RecipeActionRequest, SavedRecipeResponse
 
 router = APIRouter()
 

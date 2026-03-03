@@ -6,7 +6,7 @@ import psycopg2
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from app.config import get_settings
+from app.core.config import get_settings
 
 
 class UserDatabase:
