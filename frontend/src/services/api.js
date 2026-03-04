@@ -140,11 +140,20 @@ export async function fetchUserProfile(token) {
 
 /**
  * Chat with AI assistant
+ * @param {string} sessionId
+ * @param {string} message
+ * @param {object|null} recipeContext
+ * @param {string|null} token - Auth0 access token (optional, enables memory)
  */
-export async function chat(sessionId, message, recipeContext = null) {
+export async function chat(sessionId, message, recipeContext = null, token = null) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
             session_id: sessionId,
             message: message,

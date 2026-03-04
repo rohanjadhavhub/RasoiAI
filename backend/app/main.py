@@ -45,6 +45,29 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(user_history.router, prefix="/api", tags=["User History"])
 
 
+# ── LangGraph Checkpointer Lifecycle ─────────────────────────
+
+@app.on_event("startup")
+async def startup_langgraph():
+    """Initialise LangGraph PostgreSQL checkpointer on app startup."""
+    try:
+        from app.services.chat_graph import init_checkpointer
+        await init_checkpointer()
+    except Exception as e:
+        print(f"[Startup] LangGraph checkpointer init failed: {e}")
+        print("[Startup] Chat will fall back to stateless mode.")
+
+
+@app.on_event("shutdown")
+async def shutdown_langgraph():
+    """Close LangGraph connection pool on app shutdown."""
+    try:
+        from app.services.chat_graph import close_checkpointer
+        await close_checkpointer()
+    except Exception as e:
+        print(f"[Shutdown] LangGraph cleanup error: {e}")
+
+
 @app.get("/")
 async def root():
     """Root endpoint"""

@@ -10,6 +10,7 @@ class ChatRequest(BaseModel):
     session_id: str
     message: str
     recipe_context: Optional[Dict[str, Any]] = None
+    user_id: Optional[str] = None  # auth0_sub (set by backend from token)
 
 
 class ChatResponse(BaseModel):
@@ -18,3 +19,4 @@ class ChatResponse(BaseModel):
     suggestions: List[str] = []
     response_type: str = "chat"
     updated_recipe: Optional[Dict[str, Any]] = None
+    thread_id: Optional[str] = None  # echoed back for frontend awareness

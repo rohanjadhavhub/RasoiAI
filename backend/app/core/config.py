@@ -40,6 +40,14 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
 
+    @property
+    def database_url_psycopg(self) -> str:
+        """Derive psycopg v3 connection string from existing DATABASE_URL."""
+        url = self.database_url
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return url
+
 
 @lru_cache()
 def get_settings() -> Settings:

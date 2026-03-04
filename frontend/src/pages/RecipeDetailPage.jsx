@@ -140,7 +140,17 @@ function RecipeDetailPage() {
         setIsLoading(true);
 
         try {
-            const response = await chat(sessionId || 'default', userMessage, displayRecipe);
+            // Get auth token for persistent memory (if logged in)
+            let token = null;
+            if (isAuthenticated) {
+                try {
+                    token = await getAccessTokenSilently();
+                } catch (e) {
+                    // Not logged in or token expired — proceed without memory
+                }
+            }
+
+            const response = await chat(sessionId || 'default', userMessage, displayRecipe, token);
 
             if (response.response_type === 'recipe_update' && response.updated_recipe) {
                 // Merge updated recipe fields into displayRecipe

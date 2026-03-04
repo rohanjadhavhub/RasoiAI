@@ -7,6 +7,7 @@ import {
     removeFavourite,
     getBookmarks,
     removeBookmark,
+    getRecipe,
 } from '../services/api';
 import './ProfilePage.css';
 
@@ -71,17 +72,29 @@ const ProfilePage = () => {
         }
     };
 
-    const handleRecipeClick = (item) => {
-        navigate('/recipe', {
-            state: {
-                recipe: {
-                    recipe_id: item.recipe_id,
-                    recipe: item.recipe_name,
-                    ingredients: '',
-                    instruction: '',
+    const handleRecipeClick = async (item) => {
+        try {
+            // Fetch full recipe details (ingredients + instructions) by ID
+            const fullRecipe = await getRecipe(item.recipe_id);
+            navigate('/recipe', {
+                state: {
+                    recipe: fullRecipe,
                 },
-            },
-        });
+            });
+        } catch (err) {
+            console.error('Failed to load recipe:', err);
+            // Fallback: navigate with just the name
+            navigate('/recipe', {
+                state: {
+                    recipe: {
+                        recipe_id: item.recipe_id,
+                        recipe: item.recipe_name,
+                        ingredients: '',
+                        instruction: '',
+                    },
+                },
+            });
+        }
     };
 
     if (isLoading || isSyncing) {

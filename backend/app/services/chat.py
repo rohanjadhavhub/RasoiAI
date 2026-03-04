@@ -1,78 +1,67 @@
 """
 Chat Service - Conversational AI for recipe assistance (Annapurna)
+
+Authenticated users → LangGraph workflow with persistent memory.
+Unauthenticated   → stateless Gemini call (no memory).
 """
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, Optional
 from google import genai
 
 from app.core.config import get_settings
 
 settings = get_settings()
 
-# Configure Gemini client
+# Configure Gemini client (used only for unauthenticated fallback)
 client = genai.Client(api_key=settings.gemini_api_key) if settings.gemini_api_key else None
 
 
-CHAT_SYSTEM_PROMPT = """You are Annapurna, a world-class Indian recipe chef with decades of mastery over every regional Indian cuisine — from Kashmiri to Chettinad, Gujarati to Bengali, street food to royal Mughlai. You know every technique, every spice ratio, every shortcut, and every secret that makes a dish extraordinary.
+# ── System Prompt (lean, shared with chat_graph.py) ──────────
 
-Current Context:
-- User has these ingredients: {ingredients}
-- Currently discussing recipe: {recipe_name}
-- Recipe details: {recipe_details}
+CHAT_SYSTEM_PROMPT = """You are Annapurna, an expert Indian chef across all regional cuisines.
 
-YOUR PERSONALITY:
-- You are confident, warm, and authoritative. You speak like a seasoned chef guiding someone in your own kitchen.
-- You give clear, direct answers. No hedging, no "I think", no "maybe try".
-- You ALWAYS know the answer when it comes to cooking and recipes. You never say "I don't know", "I'm not sure", "I have no idea", or any variation. If a dish can be made better, you know how.
-- Keep it conversational and human. Short sentences. Get to the point fast.
+CONTEXT:
+User profile: {user_preferences}
+Ingredients: {ingredients} | Recipe: {recipe_name} | Details: {recipe_details}
 
-STRICT RULES:
-1. NEVER greet the user. No "Namaste", "Welcome", "Hello", "Hi" or any greeting. Jump straight into the answer.
-2. NEVER use markdown formatting. No stars (*), no bold (**), no headers (#), no bullet symbols, no dashes.
-3. NEVER use emojis.
-4. NEVER say "I don't know", "I'm not sure", "I have no idea", "I can't help with that" or any negation. You are an expert — you always have an answer for recipe and cooking questions.
-5. If the user asks something completely unrelated to food, cooking, or recipes, redirect them smoothly. Say something like "That is outside my kitchen, but if you have any questions about this recipe, fire away." Keep it one line, no lectures.
-6. Do NOT ask unnecessary follow-up questions. Be direct. If the user asks "can I use a pressure cooker?" just tell them how, do not ask back "which pressure cooker do you have?" etc.
-7. When the user wants to MODIFY the recipe (change servings, adjust spice, swap ingredients, change cooking time, make it vegan, etc.), FIRST confirm what exactly they want. One short question like "How many servings?" or "Want me to cut the chilies in half or remove them entirely?" Then wait for their answer.
-8. ONLY after the user confirms, respond with the updated recipe in the format below.
+STYLE: Confident, warm, direct. Short sentences. No hedging.
 
-RESPONSE FORMAT — always reply as valid JSON:
-{{
-  "type": "chat",
-  "content": "your plain text answer here"
-}}
+RULES:
+- No greetings, no markdown, no emojis
+- Always have a cooking answer. Never say "I don't know"
+- Off-topic: "That's outside my kitchen — ask me about this recipe."
+- No unnecessary follow-up questions. Answer directly.
+- Modifications: ask ONE clarifying question first, wait, then return updated recipe JSON.
 
-When the user has confirmed a recipe modification and you are providing the updated recipe:
-{{
-  "type": "recipe_update",
-  "content": "Done, updated the recipe for you.",
-  "updated_recipe": {{
-    "recipe": "Recipe Name",
-    "ingredients": "updated ingredient 1, updated ingredient 2, updated ingredient 3",
-    "servings": "2",
-    "cook_time": "25 min",
-    "spice_level": "Mild"
-  }}
-}}
+OUTPUT: Always return valid JSON only. Nothing outside it.
 
-IMPORTANT:
-- NEVER change the "instruction" field. Cooking instructions must always stay exactly as they are. Do NOT include "instruction" in updated_recipe.
-- The "ingredients" field must be a comma-separated string.
-- Only include fields that actually changed in updated_recipe, plus always include recipe and ingredients.
-- Always respond with valid JSON. No text outside the JSON object.
+Chat reply:
+{{"type":"chat","content":"plain text answer"}}
+
+After user confirms a modification:
+{{"type":"recipe_update","content":"Done, updated the recipe for you.","updated_recipe":{{"recipe":"Name","ingredients":"item1, item2","servings":"2","cook_time":"25 min","spice_level":"Mild"}}}}
+
+JSON RULES:
+- Never include or change "instruction" field
+- "ingredients" = comma-separated string
+- Only include changed fields + always include "recipe" and "ingredients"
 """
 
 
 async def get_chat_response(
     message: str,
-    context: Dict[str, Any]
+    context: Dict[str, Any],
+    user_id: Optional[str] = None,
+    internal_user_id: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
-    Get chat response from AI
+    Get chat response from AI.
 
     Args:
         message: User's message
         context: Current session context (ingredients, recipe, etc.)
+        user_id: auth0_sub (if authenticated) — enables memory
+        internal_user_id: DB users.id (if authenticated)
 
     Returns:
         Dict with response, response_type, and optionally updated_recipe
@@ -80,36 +69,44 @@ async def get_chat_response(
     if not settings.gemini_api_key:
         return _get_mock_response(message)
 
+    # ── Authenticated path: LangGraph with memory ────────────
+    if user_id and internal_user_id:
+        try:
+            from app.services.chat_graph import invoke_chat_graph
+            return await invoke_chat_graph(user_id, internal_user_id, message, context)
+        except Exception as e:
+            print(f"[LangGraph Error] {type(e).__name__}: {e}")
+            # Fall through to stateless path as safety net
+
+    # ── Unauthenticated / fallback: stateless Gemini call ────
     try:
-        # Build context for prompt
         ingredients = context.get("ingredients", [])
         selected_recipe = context.get("selected_recipe") or context.get("recipe_context", {})
         recipe_name = selected_recipe.get("recipe", "None selected") if selected_recipe else "None selected"
         recipe_details = ""
 
         if selected_recipe:
-            recipe_details = f"""
-Recipe: {selected_recipe.get('recipe', '')}
-Ingredients: {selected_recipe.get('ingredients', '')}
-Instructions: {selected_recipe.get('instruction', '')[:500]}...
-"""
+            recipe_details = (
+                f"Recipe: {selected_recipe.get('recipe', '')}. "
+                f"Ingredients: {selected_recipe.get('ingredients', '')}. "
+                f"Instructions: {str(selected_recipe.get('instruction', ''))[:300]}..."
+            )
 
         system_prompt = CHAT_SYSTEM_PROMPT.format(
+            user_preferences="Not logged in.",
             ingredients=", ".join(ingredients) if ingredients else "Not specified",
             recipe_name=recipe_name,
-            recipe_details=recipe_details or "No recipe selected yet"
+            recipe_details=recipe_details or "No recipe selected yet",
         )
 
-        # Send full prompt with context
         full_prompt = f"{system_prompt}\n\nUser message: {message}"
 
         response = client.models.generate_content(
             model=settings.gemini_text_model,
-            contents=full_prompt
+            contents=full_prompt,
         )
         response_text = response.text.strip()
 
-        # Parse the JSON response from AI
         parsed = _parse_ai_response(response_text)
 
         result = {
@@ -132,7 +129,6 @@ Instructions: {selected_recipe.get('instruction', '')[:500]}...
 
 def _parse_ai_response(text: str) -> Dict[str, Any]:
     """Parse JSON response from AI, with fallback for non-JSON responses"""
-    # Strip markdown code fences if AI wraps in ```json ... ```
     cleaned = text.strip()
     if cleaned.startswith("```"):
         lines = cleaned.split("\n")
@@ -148,7 +144,6 @@ def _parse_ai_response(text: str) -> Dict[str, Any]:
     except json.JSONDecodeError:
         pass
 
-    # Fallback: strip any markdown artifacts and return as plain chat
     clean_text = _clean_response_text(text)
     return {"type": "chat", "content": clean_text}
 

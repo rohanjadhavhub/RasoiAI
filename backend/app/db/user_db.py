@@ -93,6 +93,27 @@ class UserDatabase:
                     UNIQUE(user_id, recipe_id)
                 )
             """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS user_preferences (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) UNIQUE,
+                    preferred_spice_level TEXT,
+                    dietary_restrictions TEXT,
+                    favorite_cuisines TEXT,
+                    disliked_ingredients TEXT,
+                    region TEXT,
+                    community TEXT,
+                    cooking_style TEXT,
+                    general_notes TEXT,
+                    updated_at TIMESTAMP DEFAULT NOW()
+                )
+            """)
+            # Safe migration: add columns if table already exists
+            for col in ('region', 'community', 'cooking_style', 'general_notes'):
+                cursor.execute(f"""
+                    ALTER TABLE user_preferences
+                    ADD COLUMN IF NOT EXISTS {col} TEXT
+                """)
             conn.commit()
         finally:
             conn.close()
@@ -239,6 +260,77 @@ class UserDatabase:
             conn.close()
 
     # ─── Bookmarks ────────────────────────────────────────────
+
+    # ─── User Preferences ─────────────────────────────────────
+
+    _PREF_COLUMNS = (
+        "preferred_spice_level",
+        "dietary_restrictions",
+        "favorite_cuisines",
+        "disliked_ingredients",
+        "region",
+        "community",
+        "cooking_style",
+        "general_notes",
+    )
+
+    def upsert_preferences(
+        self, user_id: int, prefs: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Create or update user preferences extracted from chat."""
+        conn = self.get_connection()
+        try:
+            cursor = conn.cursor()
+            now = datetime.utcnow().isoformat()
+            cursor.execute(
+                "SELECT id FROM user_preferences WHERE user_id = %s",
+                (user_id,),
+            )
+            exists = cursor.fetchone()
+            if exists:
+                sets, vals = [], []
+                for col in self._PREF_COLUMNS:
+                    if col in prefs and prefs[col]:
+                        sets.append(f"{col} = %s")
+                        vals.append(prefs[col])
+                if sets:
+                    sets.append("updated_at = %s")
+                    vals.append(now)
+                    vals.append(user_id)
+                    cursor.execute(
+                        f"UPDATE user_preferences SET {', '.join(sets)} WHERE user_id = %s",
+                        vals,
+                    )
+            else:
+                cols = ', '.join(self._PREF_COLUMNS)
+                placeholders = ', '.join(['%s'] * len(self._PREF_COLUMNS))
+                values = [prefs.get(c, '') for c in self._PREF_COLUMNS]
+                cursor.execute(
+                    f"""
+                    INSERT INTO user_preferences
+                        (user_id, {cols}, updated_at)
+                    VALUES (%s, {placeholders}, %s)
+                    """,
+                    [user_id] + values + [now],
+                )
+            conn.commit()
+            return self.get_preferences(user_id)
+        finally:
+            conn.close()
+
+    def get_preferences(self, user_id: int) -> Optional[Dict[str, Any]]:
+        """Get user preferences."""
+        conn = self.get_connection()
+        try:
+            cursor = conn.cursor()
+            cols = ', '.join(self._PREF_COLUMNS)
+            cursor.execute(
+                f"SELECT {cols} FROM user_preferences WHERE user_id = %s",
+                (user_id,),
+            )
+            return self._row_to_dict(cursor)
+        finally:
+            conn.close()
 
     def add_bookmark(
         self, user_id: int, recipe_id: int, recipe_name: Optional[str] = None
