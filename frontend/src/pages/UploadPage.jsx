@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UploadPage.css';
-import { uploadImages, analyzeIngredients, searchRecipes } from '../services/api';
+import { uploadImages, analyzeIngredients, searchRecipes, remoteScan, getRpiImageUrl } from '../services/api';
 
 function UploadPage() {
     const navigate = useNavigate();
@@ -10,6 +10,11 @@ function UploadPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [manualInput, setManualInput] = useState('');
+
+    // Remote scan state
+    const [isScanning, setIsScanning] = useState(false);
+    const [scanPreview, setScanPreview] = useState(null);
+    const [scanIngredients, setScanIngredients] = useState([]);
 
     const handleFileChange = useCallback((e) => {
         const selectedFiles = Array.from(e.target.files).slice(0, 3);
@@ -75,6 +80,44 @@ function UploadPage() {
         }
     };
 
+    const handleRemoteScan = async () => {
+        setIsScanning(true);
+        setError(null);
+        setScanPreview(null);
+        setScanIngredients([]);
+
+        try {
+            const data = await remoteScan();
+
+            // Show captured image preview
+            setScanPreview(getRpiImageUrl());
+            setScanIngredients(data.ingredients_detected || []);
+
+            // Navigate to recipes with results from RPi
+            const recipes = data.recipes?.recipes || [];
+            const ready = recipes.filter(r => r.readiness === 'READY');
+            const almost = recipes.filter(r => r.readiness === 'ALMOST_THERE');
+            const shopping = recipes.filter(r => r.readiness === 'NEED_SHOPPING');
+
+            // Short delay so user sees the scan result before navigating
+            setTimeout(() => {
+                navigate('/recipes', {
+                    state: {
+                        recommendations: {
+                            ready_to_cook: ready,
+                            almost_there: almost,
+                            need_shopping: shopping
+                        }
+                    }
+                });
+            }, 1500);
+        } catch (err) {
+            setError(err.message || 'Remote scan failed — is the RPi online?');
+        } finally {
+            setIsScanning(false);
+        }
+    };
+
     const handleManualSearch = async () => {
         if (!manualInput.trim()) {
             setError('Please enter some ingredients');
@@ -121,7 +164,7 @@ function UploadPage() {
                 <div className="page-content">
                     <div className="upload-header fade-in">
                         <h1>What's in Your Kitchen?</h1>
-                        <p>Upload photos of your ingredients or type them manually</p>
+                        <p>Upload photos, scan from your RPi camera, or type ingredients manually</p>
                     </div>
 
                     {/* Image Upload Section */}
@@ -192,6 +235,48 @@ function UploadPage() {
                                     <>🔍 Analyze Ingredients</>
                                 )}
                             </button>
+                        )}
+                    </div>
+
+                    <div className="divider">
+                        <span>or</span>
+                    </div>
+
+                    {/* RPi Remote Scan Section */}
+                    <div className="remote-scan-section slide-up">
+                        <h3 className="section-title">📡 Scan from Raspberry Pi</h3>
+                        <p className="remote-scan-desc">
+                            Capture ingredients directly from your RPi kitchen camera
+                        </p>
+
+                        <button
+                            className="btn btn-scan"
+                            onClick={handleRemoteScan}
+                            disabled={isScanning || isLoading}
+                            id="remote-scan-btn"
+                        >
+                            {isScanning ? (
+                                <>
+                                    <div className="spinner" style={{ width: 20, height: 20 }}></div>
+                                    Scanning & Analyzing…
+                                </>
+                            ) : (
+                                <>📸 Capture & Find Recipes</>
+                            )}
+                        </button>
+
+                        {scanPreview && (
+                            <div className="scan-result">
+                                <img src={scanPreview} alt="Scanned ingredients" className="scan-preview" />
+                                {scanIngredients.length > 0 && (
+                                    <div className="scan-ingredients">
+                                        <span className="scan-label">Detected:</span>
+                                        {scanIngredients.map(ing => (
+                                            <span key={ing} className="chip">{ing}</span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
 

@@ -3,6 +3,32 @@
  */
 
 const API_BASE = 'http://localhost:8000/api';
+const RPI_CAMERA_BASE = 'http://172.31.185.50:8001/api/camera';
+
+
+/**
+ * Trigger RPi camera scan → Gemini Vision → forward to main app for recipes.
+ * Returns { success, image_path, ingredients_detected, analysis_details, recipes }
+ */
+export async function remoteScan() {
+    const response = await fetch(`${RPI_CAMERA_BASE}/scan-and-forward`, {
+        method: 'POST',
+    });
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.detail || 'Remote scan failed');
+    }
+
+    return response.json();
+}
+
+/**
+ * Get the latest captured image URL from the RPi camera.
+ */
+export function getRpiImageUrl() {
+    return `${RPI_CAMERA_BASE}/latest-image?t=${Date.now()}`;
+}
 
 /**
  * Upload images for ingredient analysis
