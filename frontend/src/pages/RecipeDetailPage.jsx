@@ -122,6 +122,32 @@ function RecipeDetailPage() {
 
     const steps = parseInstructions(displayRecipe.instruction);
 
+    // ─── Gap Analysis: classify each ingredient ────────────────────
+    const hasGapData = displayRecipe.have || displayRecipe.missing_critical || displayRecipe.missing_optional;
+
+    const classifyIngredient = (rawIngredient) => {
+        if (!hasGapData) return null; // no gap data → no highlighting
+
+        // Normalize the raw ingredient the same way the backend does
+        let norm = rawIngredient.toLowerCase().trim();
+        norm = norm.replace(/\d+[\s]*(?:tsp|tbsp|cup|cups|kg|g|ml|l|pieces?|medium|small|large|inch)?[\s]*/g, '');
+        norm = norm.replace(/(?:fresh|dried|chopped|sliced|diced|grated|minced|crushed|boiled|cooked|raw)\s*/g, '');
+        norm = norm.replace(/\s*[-–]\s*.*$/, '');
+        norm = norm.replace(/\s*\(.*\)/, '');
+        norm = norm.trim();
+
+        const matchesList = (list) =>
+            list?.some(item => {
+                const lo = item.toLowerCase();
+                return lo === norm || lo.includes(norm) || norm.includes(lo);
+            });
+
+        if (matchesList(displayRecipe.have)) return 'have';
+        if (matchesList(displayRecipe.missing_critical)) return 'missing';
+        if (matchesList(displayRecipe.missing_optional)) return 'optional';
+        return null; // assumed-available or unclassified
+    };
+
     // Clean any residual markdown from chat text
     const cleanText = (text) => {
         return text
@@ -257,13 +283,29 @@ function RecipeDetailPage() {
                         {/* Ingredients */}
                         <div className="recipe-section">
                             <h2>Ingredients</h2>
+
+                            {/* Legend — only when gap data exists */}
+                            {hasGapData && (
+                                <div className="ingredient-legend">
+                                    <span className="legend-item legend-have">Available</span>
+                                    <span className="legend-item legend-missing">Missing</span>
+                                    <span className="legend-item legend-optional">Optional</span>
+                                </div>
+                            )}
+
                             <div className="ingredients-list-detail">
-                                {displayRecipe.ingredients.split(',').map((ing, i) => (
-                                    <div key={i} className="ingredient-item">
-                                        <span className="ingredient-bullet">•</span>
-                                        <span>{ing.trim()}</span>
-                                    </div>
-                                ))}
+                                {displayRecipe.ingredients.split(',').map((ing, i) => {
+                                    const status = classifyIngredient(ing);
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={`ingredient-item ${status ? `ingredient-${status}` : ''}`}
+                                        >
+                                            <span className="ingredient-bullet">•</span>
+                                            <span>{ing.trim()}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 

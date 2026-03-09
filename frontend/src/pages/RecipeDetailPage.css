@@ -168,11 +168,90 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
+    padding: 6px 10px;
+    border-left: 3px solid transparent;
+    border-radius: 4px;
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .ingredient-bullet {
     color: var(--primary);
     font-weight: bold;
+}
+
+/* ─── Ingredient Gap-Analysis Highlighting ──────────── */
+
+.ingredient-legend {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+
+.legend-have {
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.legend-missing {
+    color: #ff5252;
+    background: rgba(255, 82, 82, 0.1);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+}
+
+.legend-optional {
+    color: #ffb300;
+    background: rgba(255, 179, 0, 0.1);
+    border: 1px solid rgba(255, 179, 0, 0.3);
+}
+
+/* Available ingredient */
+.ingredient-item.ingredient-have {
+    border-left-color: rgba(76, 175, 80, 0.5);
+}
+
+.ingredient-item.ingredient-have .ingredient-bullet {
+    color: #4caf50;
+}
+
+/* Missing critical ingredient */
+.ingredient-item.ingredient-missing {
+    border-left-color: rgba(255, 82, 82, 0.5);
+    background: rgba(255, 82, 82, 0.06);
+}
+
+.ingredient-item.ingredient-missing .ingredient-bullet {
+    color: #ff5252;
+    font-weight: 700;
+}
+
+.ingredient-item.ingredient-missing>span:last-child {
+    color: #ff8a80;
+    font-weight: 500;
+}
+
+/* Missing optional ingredient */
+.ingredient-item.ingredient-optional {
+    border-left-color: rgba(255, 179, 0, 0.45);
+}
+
+.ingredient-item.ingredient-optional .ingredient-bullet {
+    color: #ffb300;
+}
+
+.ingredient-item.ingredient-optional>span:last-child {
+    color: var(--text-secondary);
+    font-style: italic;
 }
 
 /* Instructions */
