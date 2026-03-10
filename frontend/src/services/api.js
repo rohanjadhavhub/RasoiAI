@@ -3,24 +3,58 @@
  */
 
 const API_BASE = 'http://localhost:8000/api';
-const RPI_CAMERA_BASE = 'http://172.31.185.50:8001/api/camera';
+// RPi camera accessed via SSH tunnel: ssh -N -L 8001:localhost:8001 rohanjadhav@raspberrypi.local
+const RPI_CAMERA_BASE = 'http://localhost:8001/api/camera';
 
 
 /**
- * Trigger RPi camera scan → Gemini Vision → forward to main app for recipes.
- * Returns { success, image_path, ingredients_detected, analysis_details, recipes }
+ * Trigger RPi camera scan + Gemini Vision analysis.
+ * Two-step flow:
+ *   1. RPi captures image + runs Vision analysis (via SSH tunnel → localhost:8001)
+ *   2. Frontend sends extracted ingredients to main backend directly (localhost:8000)
+ * This avoids the RPi needing to reach the Mac backend (different subnets).
  */
 export async function remoteScan() {
-    const response = await fetch(`${RPI_CAMERA_BASE}/scan-and-forward`, {
-        method: 'POST',
-    });
-
-    if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.detail || 'Remote scan failed');
+    // Step 1: Capture + Analyse on RPi
+    // First trigger a scan
+    const scanRes = await fetch(`${RPI_CAMERA_BASE}/scan`, { method: 'POST' });
+    if (!scanRes.ok) {
+        const data = await scanRes.json().catch(() => ({}));
+        throw new Error(data.detail || 'Camera capture failed');
     }
 
-    return response.json();
+    // Then analyse the captured image
+    const analyzeRes = await fetch(`${RPI_CAMERA_BASE}/analyze`, { method: 'POST' });
+    if (!analyzeRes.ok) {
+        const data = await analyzeRes.json().catch(() => ({}));
+        throw new Error(data.detail || 'Vision analysis failed');
+    }
+    const analysis = await analyzeRes.json();
+
+    // Step 2: Send ingredients to main backend
+    const ingredients = analysis.ingredient_names || [];
+    if (ingredients.length === 0) {
+        return { success: true, ingredients_detected: [], recipes: { recipes: [] }, analysis };
+    }
+
+    const recipesRes = await fetch(`${API_BASE}/remote-ingredients`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ingredients }),
+    });
+
+    if (!recipesRes.ok) {
+        const data = await recipesRes.json().catch(() => ({}));
+        throw new Error(data.detail || 'Recipe search failed');
+    }
+
+    const recipes = await recipesRes.json();
+    return {
+        success: true,
+        ingredients_detected: ingredients,
+        analysis_details: analysis.analysis,
+        recipes,
+    };
 }
 
 /**
