@@ -244,9 +244,9 @@ function UploadPage() {
 
                     {/* RPi Remote Scan Section */}
                     <div className="remote-scan-section slide-up">
-                        <h3 className="section-title">📡 Scan from Raspberry Pi</h3>
+                        <h3 className="section-title">📡 Scan from Fridge</h3>
                         <p className="remote-scan-desc">
-                            Capture ingredients directly from your RPi kitchen camera
+                            Capture ingredients directly from your Fridge camera
                         </p>
 
                         <button
