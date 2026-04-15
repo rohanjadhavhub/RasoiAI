@@ -99,21 +99,37 @@ const ProfilePage = () => {
 
     if (isLoading || isSyncing) {
         return (
-            <div className="profile-container">
-                <div className="profile-card loading">
-                    <div className="loader"></div>
-                    <p>Loading profile...</p>
-                </div>
+            <div className="profile-page">
+                <section className="chapter chapter--profile-loading">
+                    <div className="container">
+                        <div className="profile-loading-content">
+                            <div className="spinner"></div>
+                            <p>Setting the table...</p>
+                        </div>
+                    </div>
+                </section>
             </div>
         );
     }
 
     if (!isAuthenticated) {
         return (
-            <div className="profile-container">
-                <div className="profile-card error">
-                    <p>Please log in to view your profile.</p>
-                </div>
+            <div className="profile-page">
+                <section className="chapter chapter--profile-hero">
+                    <div className="container">
+                        <div className="chapter__content fade-in">
+                            <span className="chapter__label">Welcome</span>
+                            <h1 className="chapter__headline">
+                                Your kitchen story<br />
+                                starts with a login.
+                            </h1>
+                            <p className="chapter__body">
+                                Sign in to save your favourite recipes, bookmark dishes for later,
+                                and build your personal cooking journal.
+                            </p>
+                        </div>
+                    </div>
+                </section>
             </div>
         );
     }
@@ -121,8 +137,8 @@ const ProfilePage = () => {
     const renderList = (items, type) => {
         if (historyLoading) {
             return (
-                <div className="history-loading">
-                    <div className="loader"></div>
+                <div className="profile-list-loading">
+                    <div className="spinner" style={{ width: 24, height: 24 }}></div>
                     <p>Loading...</p>
                 </div>
             );
@@ -130,9 +146,14 @@ const ProfilePage = () => {
 
         if (items.length === 0) {
             return (
-                <div className="history-empty">
-                    <p>No {type} yet</p>
-                    <p className="empty-hint">
+                <div className="profile-empty-state">
+                    <div className="profile-empty-icon">
+                        {type === 'favourites' ? '♡' : '⊟'}
+                    </div>
+                    <p className="profile-empty-title">
+                        No {type} yet
+                    </p>
+                    <p className="profile-empty-hint">
                         {type === 'favourites'
                             ? 'Tap the heart on any recipe to add it here'
                             : 'Tap bookmark on any recipe to save it for later'}
@@ -144,19 +165,17 @@ const ProfilePage = () => {
         return (
             <div className="saved-recipes-list">
                 {items.map((item) => (
-                    <div key={item.recipe_id} className="saved-recipe-card">
+                    <div key={item.recipe_id} className="saved-recipe-row">
                         <div
                             className="saved-recipe-info"
                             onClick={() => handleRecipeClick(item)}
                         >
-                            <div className="saved-recipe-text">
-                                <p className="saved-recipe-name">
-                                    {item.recipe_name || `Recipe #${item.recipe_id}`}
-                                </p>
-                                <p className="saved-recipe-date">
-                                    Added {new Date(item.created_at).toLocaleDateString()}
-                                </p>
-                            </div>
+                            <p className="saved-recipe-name">
+                                {item.recipe_name || `Recipe #${item.recipe_id}`}
+                            </p>
+                            <p className="saved-recipe-date">
+                                Added {new Date(item.created_at).toLocaleDateString()}
+                            </p>
                         </div>
                         <button
                             className="remove-btn"
@@ -165,7 +184,7 @@ const ProfilePage = () => {
                                     ? handleRemoveFavourite(item.recipe_id)
                                     : handleRemoveBookmark(item.recipe_id)
                             }
-                            title="Delete"
+                            title="Remove"
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="3 6 5 6 21 6" />
@@ -181,52 +200,96 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="profile-container">
-            <div className="profile-card">
-                <div className="profile-header">
-                    <img src={user.picture} alt={user.name} className="profile-avatar" />
-                    <div className="profile-info">
-                        <h1>{user.name}</h1>
-                        <p className="email">{user.email}</p>
-                        <span className="badge">Authenticated</span>
+        <div className="profile-page">
+
+            {/* Chapter 1: Your Identity */}
+            <section className="chapter chapter--profile-hero">
+                <div className="container">
+                    <div className="chapter__content fade-in">
+                        <span className="chapter__label">Your kitchen, your story</span>
+                        <h1 className="chapter__headline">
+                            Welcome back,<br />
+                            <em>{user.name?.split(' ')[0] || 'Chef'}.</em>
+                        </h1>
                     </div>
                 </div>
+            </section>
 
-                <div className="profile-content">
-                    {/* ─── Favourites & Bookmarks Tabs ──────────────── */}
-                    <section className="profile-section history-section">
-                        <h2>My Recipes</h2>
-                        <div className="history-tabs">
+            {/* Chapter 2: Profile Card */}
+            <section className="chapter chapter--profile-card">
+                <div className="container">
+                    <div className="profile-identity slide-up">
+                        <img src={user.picture} alt={user.name} className="profile-avatar" />
+                        <div className="profile-details">
+                            <h2 className="profile-name">{user.name}</h2>
+                            <p className="profile-email">{user.email}</p>
+                            <span className="profile-badge">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                Verified Chef
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Chapter 3: Saved Recipes */}
+            <section className="chapter chapter--profile-recipes">
+                <div className="container">
+                    <div className="chapter__content">
+                        <span className="chapter__label">Your collection</span>
+                        <h2 className="chapter__headline profile-recipes__headline">
+                            Every dish tells a story.<br />
+                            These are yours.
+                        </h2>
+
+                        <div className="profile-tabs">
                             <button
-                                className={`tab-btn ${activeTab === 'favourites' ? 'active' : ''}`}
+                                className={`profile-tab ${activeTab === 'favourites' ? 'profile-tab--active' : ''}`}
                                 onClick={() => setActiveTab('favourites')}
                             >
                                 Favourites
                                 {favourites.length > 0 && (
-                                    <span className="tab-count">{favourites.length}</span>
+                                    <span className="profile-tab__count">{favourites.length}</span>
                                 )}
                             </button>
                             <button
-                                className={`tab-btn ${activeTab === 'bookmarks' ? 'active' : ''}`}
+                                className={`profile-tab ${activeTab === 'bookmarks' ? 'profile-tab--active' : ''}`}
                                 onClick={() => setActiveTab('bookmarks')}
                             >
                                 Bookmarks
                                 {bookmarks.length > 0 && (
-                                    <span className="tab-count">{bookmarks.length}</span>
+                                    <span className="profile-tab__count">{bookmarks.length}</span>
                                 )}
                             </button>
                         </div>
 
-                        <div className="tab-content">
+                        <div className="profile-tab-content slide-up">
                             {activeTab === 'favourites'
                                 ? renderList(favourites, 'favourites')
                                 : renderList(bookmarks, 'bookmarks')}
                         </div>
-                    </section>
+                    </div>
 
-                    {error && <p className="error-msg">{error}</p>}
+                    {error && (
+                        <div className="profile-error fade-in">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="15" y1="9" x2="9" y2="15" />
+                                <line x1="9" y1="9" x2="15" y2="15" />
+                            </svg>
+                            {error}
+                        </div>
+                    )}
                 </div>
-            </div>
+            </section>
+
+            <footer className="landing-footer">
+                <div className="container">
+                    <p>RasoiAI — built for Indian home cooking</p>
+                </div>
+            </footer>
         </div>
     );
 };

@@ -57,9 +57,9 @@ function RecipeDetailPage() {
 
     if (!recipe) {
         return (
-            <div className="page">
+            <div className="rd-page">
                 <div className="container">
-                    <div className="empty-state">
+                    <div className="rd-empty">
                         <p>No recipe selected</p>
                         <button className="btn btn-primary" onClick={() => navigate('/recipes')}>
                             Back to Recipes
@@ -218,199 +218,226 @@ function RecipeDetailPage() {
     };
 
     return (
-        <div className="page recipe-detail-page">
-            <div className="container">
-                <button className="back-btn" onClick={() => navigate(-1)}>
-                    ← Back to Recipes
-                </button>
+        <div className="rd-page">
 
-                <div className="recipe-detail-content">
-                    {/* Recipe Info */}
-                    <div className={`recipe-main fade-in ${isModified ? 'recipe-updated' : ''}`}>
-                        <div className="recipe-header">
-                            <div className="recipe-title-row">
-                                <h1>{displayRecipe.recipe}</h1>
-                                {isModified && (
-                                    <span className="modified-badge">Modified</span>
-                                )}
-                            </div>
-                            <div className="recipe-meta">
-                                <span className="meta-item">
-                                    ⏱️ {displayRecipe.cook_time || '~30 min'}
-                                </span>
-                                <span className="meta-item">
-                                    🍽️ {displayRecipe.servings || '4 servings'}
-                                </span>
-                                <span className="meta-item">
-                                    🌶️ {displayRecipe.spice_level || 'Medium'}
-                                </span>
-                            </div>
+            {/* Header Bar */}
+            <div className="rd-topbar">
+                <div className="container">
+                    <button className="back-btn" onClick={() => navigate(-1)}>
+                        ← Back to results
+                    </button>
+                </div>
+            </div>
 
-                            <div className="recipe-header-actions">
-                                {isModified && (
-                                    <button className="reset-btn" onClick={resetRecipe}>
-                                        Reset to original
+            {/* Recipe Title Section */}
+            <div className={`rd-hero ${isModified ? 'rd-hero--modified' : ''}`}>
+                <div className="container">
+                    <div className="rd-hero__content fade-in">
+                        <div className="rd-hero__title-row">
+                            <h1 className="rd-hero__title">{displayRecipe.recipe}</h1>
+                            {isModified && (
+                                <span className="rd-modified-badge">Modified</span>
+                            )}
+                        </div>
+                        <div className="rd-hero__meta">
+                            <span className="rd-meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                {displayRecipe.cook_time || '~30 min'}
+                            </span>
+                            <span className="rd-meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                                {displayRecipe.servings || '4 servings'}
+                            </span>
+                            <span className="rd-meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+                                {displayRecipe.spice_level || 'Medium'}
+                            </span>
+                        </div>
+                        <div className="rd-hero__actions">
+                            {isModified && (
+                                <button className="rd-reset-btn" onClick={resetRecipe}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                                    Reset to original
+                                </button>
+                            )}
+                            {isAuthenticated && (
+                                <div className="rd-action-btns">
+                                    <button
+                                        className={`rd-action-btn ${isFav ? 'rd-action-btn--active-fav' : ''}`}
+                                        onClick={toggleFavourite}
+                                        disabled={actionLoading}
+                                        title={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                                    >
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill={isFav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                        </svg>
                                     </button>
-                                )}
-
-                                {isAuthenticated && (
-                                    <div className="recipe-actions">
-                                        <button
-                                            className={`action-btn fav-btn ${isFav ? 'active' : ''}`}
-                                            onClick={toggleFavourite}
-                                            disabled={actionLoading}
-                                            title={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                                        >
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill={isFav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            className={`action-btn book-btn ${isBook ? 'active' : ''}`}
-                                            onClick={toggleBookmark}
-                                            disabled={actionLoading}
-                                            title={isBook ? 'Remove bookmark' : 'Save for later'}
-                                        >
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill={isBook ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Ingredients */}
-                        <div className="recipe-section">
-                            <h2>Ingredients</h2>
-
-                            {/* Legend — only when gap data exists */}
-                            {hasGapData && (
-                                <div className="ingredient-legend">
-                                    <span className="legend-item legend-have">Available</span>
-                                    <span className="legend-item legend-missing">Missing</span>
-                                    <span className="legend-item legend-optional">Optional</span>
+                                    <button
+                                        className={`rd-action-btn ${isBook ? 'rd-action-btn--active-book' : ''}`}
+                                        onClick={toggleBookmark}
+                                        disabled={actionLoading}
+                                        title={isBook ? 'Remove bookmark' : 'Save for later'}
+                                    >
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill={isBook ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                                        </svg>
+                                    </button>
                                 </div>
                             )}
-
-                            <div className="ingredients-list-detail">
-                                {displayRecipe.ingredients.split(',').map((ing, i) => {
-                                    const status = classifyIngredient(ing);
-                                    return (
-                                        <div
-                                            key={i}
-                                            className={`ingredient-item ${status ? `ingredient-${status}` : ''}`}
-                                        >
-                                            <span className="ingredient-bullet">•</span>
-                                            <span>{ing.trim()}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Instructions */}
-                        <div className="recipe-section">
-                            <h2>Instructions</h2>
-                            <div className="instructions-list">
-                                {steps.length > 0 ? (
-                                    steps.map((step, i) => (
-                                        <div key={i} className="instruction-step">
-                                            <span className="step-number">{i + 1}</span>
-                                            <p>{step}</p>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="instruction-fallback">{displayRecipe.instruction}</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Tips */}
-                        <div className="recipe-tips glass">
-                            <h3>Pro Tips</h3>
-                            <ul>
-                                <li>Prep all ingredients before starting to cook</li>
-                                <li>Adjust spice levels to your preference</li>
-                                <li>Let the dish rest for 2-3 minutes before serving</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* Chat Assistant — Annapurna */}
-                    <div className="recipe-chat slide-up">
-                        <div className="chat-header">
-                            <div className="chat-header-identity">
-                                <span className="annapurna-avatar">A</span>
-                                <div>
-                                    <h3>Annapurna</h3>
-                                    <p>Your personal recipe chef</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="chat-messages">
-                            {chatMessages.length === 0 ? (
-                                <div className="chat-welcome">
-                                    <div className="welcome-avatar">A</div>
-                                    <p className="welcome-text">I am Annapurna, your personal chef. Ask me anything about this recipe or tell me how you would like it changed.</p>
-                                    <div className="chat-suggestions">
-                                        <button onClick={() => handleSuggestion('Change the servings')}>
-                                            Change servings
-                                        </button>
-                                        <button onClick={() => handleSuggestion('Make it less spicy')}>
-                                            Adjust spice level
-                                        </button>
-                                        <button onClick={() => handleSuggestion('Suggest a substitution')}>
-                                            Swap an ingredient
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                chatMessages.map((msg, i) => (
-                                    <div key={i} className={`chat-message ${msg.role}`}>
-                                        {msg.role === 'assistant' && (
-                                            <span className="msg-avatar">A</span>
-                                        )}
-                                        <div className="message-content">
-                                            {msg.content.split('\n').map((line, j) => (
-                                                line.trim() ? <p key={j}>{line}</p> : null
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                            {isLoading && (
-                                <div className="chat-message assistant">
-                                    <div className="message-content typing">
-                                        <span></span><span></span><span></span>
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={messagesEndRef} />
-                        </div>
-
-                        <div className="chat-input-group">
-                            <input
-                                id="chat-input"
-                                type="text"
-                                placeholder="Ask Annapurna anything..."
-                                value={chatInput}
-                                onChange={(e) => setChatInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleChat()}
-                            />
-                            <button
-                                id="chat-send-btn"
-                                className="btn btn-primary"
-                                onClick={handleChat}
-                                disabled={isLoading}
-                            >
-                                Send
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Main Content */}
+            <div className="rd-body">
+                <div className="container">
+                    <div className="rd-layout">
+
+                        {/* Left: Recipe Details */}
+                        <div className="rd-main">
+
+                            {/* Ingredients */}
+                            <section className="rd-section">
+                                <div className="rd-section__header">
+                                    <h2>Ingredients</h2>
+                                    {hasGapData && (
+                                        <div className="rd-legend">
+                                            <span className="rd-legend__item rd-legend__item--have">Available</span>
+                                            <span className="rd-legend__item rd-legend__item--missing">Missing</span>
+                                            <span className="rd-legend__item rd-legend__item--optional">Optional</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="rd-ingredients">
+                                    {displayRecipe.ingredients.split(',').map((ing, i) => {
+                                        const status = classifyIngredient(ing);
+                                        return (
+                                            <div
+                                                key={i}
+                                                className={`rd-ingredient ${status ? `rd-ingredient--${status}` : ''}`}
+                                            >
+                                                <span className="rd-ingredient__bullet">•</span>
+                                                <span>{ing.trim()}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+
+                            {/* Instructions */}
+                            <section className="rd-section">
+                                <div className="rd-section__header">
+                                    <h2>Instructions</h2>
+                                </div>
+                                <div className="rd-steps">
+                                    {steps.length > 0 ? (
+                                        steps.map((step, i) => (
+                                            <div key={i} className="rd-step">
+                                                <span className="rd-step__num">{String(i + 1).padStart(2, '0')}</span>
+                                                <p className="rd-step__text">{step}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="rd-step__fallback">{displayRecipe.instruction}</p>
+                                    )}
+                                </div>
+                            </section>
+
+                            {/* Tips */}
+                            <section className="rd-tips">
+                                <h3>Pro Tips</h3>
+                                <ul>
+                                    <li>Prep all ingredients before starting to cook</li>
+                                    <li>Adjust spice levels to your preference</li>
+                                    <li>Let the dish rest for 2-3 minutes before serving</li>
+                                </ul>
+                            </section>
+                        </div>
+
+                        {/* Right: Chat Assistant */}
+                        <aside className="rd-chat slide-up">
+                            <div className="rd-chat__header">
+                                <div className="rd-chat__identity">
+                                    <span className="rd-chat__avatar">A</span>
+                                    <div>
+                                        <h3>Annapurna</h3>
+                                        <p>Your recipe assistant</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="rd-chat__messages">
+                                {chatMessages.length === 0 ? (
+                                    <div className="rd-chat__welcome">
+                                        <div className="rd-chat__welcome-avatar">A</div>
+                                        <p className="rd-chat__welcome-text">
+                                            I'm Annapurna — ask me anything about this recipe, or tell me how you'd like it changed.
+                                        </p>
+                                        <div className="rd-chat__suggestions">
+                                            <button onClick={() => handleSuggestion('Change the servings')}>
+                                                Change servings
+                                            </button>
+                                            <button onClick={() => handleSuggestion('Make it less spicy')}>
+                                                Adjust spice level
+                                            </button>
+                                            <button onClick={() => handleSuggestion('Suggest a substitution')}>
+                                                Swap an ingredient
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    chatMessages.map((msg, i) => (
+                                        <div key={i} className={`rd-msg rd-msg--${msg.role}`}>
+                                            {msg.role === 'assistant' && (
+                                                <span className="rd-msg__avatar">A</span>
+                                            )}
+                                            <div className="rd-msg__content">
+                                                {msg.content.split('\n').map((line, j) => (
+                                                    line.trim() ? <p key={j}>{line}</p> : null
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                                {isLoading && (
+                                    <div className="rd-msg rd-msg--assistant">
+                                        <div className="rd-msg__content rd-typing">
+                                            <span></span><span></span><span></span>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
+
+                            <div className="rd-chat__input">
+                                <input
+                                    id="chat-input"
+                                    type="text"
+                                    placeholder="Ask Annapurna anything..."
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleChat()}
+                                />
+                                <button
+                                    id="chat-send-btn"
+                                    className="btn btn-primary"
+                                    onClick={handleChat}
+                                    disabled={isLoading}
+                                >
+                                    Send
+                                </button>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+
+            <footer className="landing-footer">
+                <div className="container">
+                    <p>RasoiAI — built for Indian home cooking</p>
+                </div>
+            </footer>
         </div>
     );
 }
