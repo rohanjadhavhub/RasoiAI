@@ -100,14 +100,10 @@ const ProfilePage = () => {
     if (isLoading || isSyncing) {
         return (
             <div className="profile-page">
-                <section className="chapter chapter--profile-loading">
-                    <div className="container">
-                        <div className="profile-loading-content">
-                            <div className="spinner"></div>
-                            <p>Setting the table...</p>
-                        </div>
-                    </div>
-                </section>
+                <div className="profile-loading-state">
+                    <div className="spinner"></div>
+                    <p>Setting the table...</p>
+                </div>
             </div>
         );
     }
@@ -115,21 +111,17 @@ const ProfilePage = () => {
     if (!isAuthenticated) {
         return (
             <div className="profile-page">
-                <section className="chapter chapter--profile-hero">
-                    <div className="container">
-                        <div className="chapter__content fade-in">
-                            <span className="chapter__label">Welcome</span>
-                            <h1 className="chapter__headline">
-                                Your kitchen story<br />
-                                starts with a login.
-                            </h1>
-                            <p className="chapter__body">
-                                Sign in to save your favourite recipes, bookmark dishes for later,
-                                and build your personal cooking journal.
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                <div className="profile-unauth">
+                    <div className="profile-unauth__icon">👨‍🍳</div>
+                    <h1 className="profile-unauth__title">
+                        Your kitchen story<br />
+                        starts with a login.
+                    </h1>
+                    <p className="profile-unauth__body">
+                        Sign in to save your favourite recipes, bookmark dishes for later,
+                        and build your personal cooking journal.
+                    </p>
+                </div>
             </div>
         );
     }
@@ -202,26 +194,14 @@ const ProfilePage = () => {
     return (
         <div className="profile-page">
 
-            {/* Chapter 1: Your Identity */}
-            <section className="chapter chapter--profile-hero">
+            {/* Profile Header */}
+            <section className="profile-header">
                 <div className="container">
-                    <div className="chapter__content fade-in">
-                        <span className="chapter__label">Your kitchen, your story</span>
-                        <h1 className="chapter__headline">
-                            Welcome back,<br />
-                            <em>{user.name?.split(' ')[0] || 'Chef'}.</em>
-                        </h1>
-                    </div>
-                </div>
-            </section>
-
-            {/* Chapter 2: Profile Card */}
-            <section className="chapter chapter--profile-card">
-                <div className="container">
-                    <div className="profile-identity slide-up">
+                    <div className="profile-header__inner fade-in">
                         <img src={user.picture} alt={user.name} className="profile-avatar" />
-                        <div className="profile-details">
-                            <h2 className="profile-name">{user.name}</h2>
+                        <div className="profile-header__info">
+                            <span className="profile-greeting">Welcome back</span>
+                            <h1 className="profile-name">{user.name}</h1>
                             <p className="profile-email">{user.email}</p>
                             <span className="profile-badge">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -230,46 +210,55 @@ const ProfilePage = () => {
                                 Verified Chef
                             </span>
                         </div>
+                        <div className="profile-stats">
+                            <div className="profile-stat">
+                                <span className="profile-stat__value">{favourites.length}</span>
+                                <span className="profile-stat__label">Favourites</span>
+                            </div>
+                            <div className="profile-stat-divider"></div>
+                            <div className="profile-stat">
+                                <span className="profile-stat__value">{bookmarks.length}</span>
+                                <span className="profile-stat__label">Bookmarks</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Chapter 3: Saved Recipes */}
-            <section className="chapter chapter--profile-recipes">
+            {/* Saved Recipes */}
+            <section className="profile-recipes">
                 <div className="container">
-                    <div className="chapter__content">
-                        <span className="chapter__label">Your collection</span>
-                        <h2 className="chapter__headline profile-recipes__headline">
-                            Every dish tells a story.<br />
-                            These are yours.
-                        </h2>
+                    <div className="profile-tabs">
+                        <button
+                            className={`profile-tab ${activeTab === 'favourites' ? 'profile-tab--active' : ''}`}
+                            onClick={() => setActiveTab('favourites')}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill={activeTab === 'favourites' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
+                            Favourites
+                            {favourites.length > 0 && (
+                                <span className="profile-tab__count">{favourites.length}</span>
+                            )}
+                        </button>
+                        <button
+                            className={`profile-tab ${activeTab === 'bookmarks' ? 'profile-tab--active' : ''}`}
+                            onClick={() => setActiveTab('bookmarks')}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill={activeTab === 'bookmarks' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                            </svg>
+                            Bookmarks
+                            {bookmarks.length > 0 && (
+                                <span className="profile-tab__count">{bookmarks.length}</span>
+                            )}
+                        </button>
+                    </div>
 
-                        <div className="profile-tabs">
-                            <button
-                                className={`profile-tab ${activeTab === 'favourites' ? 'profile-tab--active' : ''}`}
-                                onClick={() => setActiveTab('favourites')}
-                            >
-                                Favourites
-                                {favourites.length > 0 && (
-                                    <span className="profile-tab__count">{favourites.length}</span>
-                                )}
-                            </button>
-                            <button
-                                className={`profile-tab ${activeTab === 'bookmarks' ? 'profile-tab--active' : ''}`}
-                                onClick={() => setActiveTab('bookmarks')}
-                            >
-                                Bookmarks
-                                {bookmarks.length > 0 && (
-                                    <span className="profile-tab__count">{bookmarks.length}</span>
-                                )}
-                            </button>
-                        </div>
-
-                        <div className="profile-tab-content slide-up">
-                            {activeTab === 'favourites'
-                                ? renderList(favourites, 'favourites')
-                                : renderList(bookmarks, 'bookmarks')}
-                        </div>
+                    <div className="profile-tab-content slide-up">
+                        {activeTab === 'favourites'
+                            ? renderList(favourites, 'favourites')
+                            : renderList(bookmarks, 'bookmarks')}
                     </div>
 
                     {error && (

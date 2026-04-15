@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UploadPage.css';
-import { uploadImages, analyzeIngredients, searchRecipes, remoteScan, getRpiImageUrl } from '../services/api';
+import { uploadImages, searchRecipes } from '../services/api';
 
 function UploadPage() {
     const navigate = useNavigate();
@@ -11,10 +11,7 @@ function UploadPage() {
     const [error, setError] = useState(null);
     const [manualInput, setManualInput] = useState('');
 
-    // Remote scan state
-    const [isScanning, setIsScanning] = useState(false);
-    const [scanPreview, setScanPreview] = useState(null);
-    const [scanIngredients, setScanIngredients] = useState([]);
+
 
     const handleFileChange = useCallback((e) => {
         const selectedFiles = Array.from(e.target.files).slice(0, 3);
@@ -62,60 +59,25 @@ function UploadPage() {
             const uploadResult = await uploadImages(files);
             const sessionId = uploadResult.session_id;
 
-            // Analyze ingredients
-            const analysisResult = await analyzeIngredients(sessionId);
-
-            // Navigate to ingredients confirmation
-            const ingredientNames = analysisResult.identified_ingredients.map(i => i.name);
-            navigate('/ingredients', {
+            // Navigate to scanning page — analysis happens there with animation
+            navigate('/ingredients-scan', {
                 state: {
                     sessionId,
-                    ingredients: ingredientNames
+                    preview: previews[0] || null
                 }
             });
         } catch (err) {
-            setError(err.message || 'Failed to analyze images');
+            setError(err.message || 'Failed to upload images');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleRemoteScan = async () => {
-        setIsScanning(true);
-        setError(null);
-        setScanPreview(null);
-        setScanIngredients([]);
-
-        try {
-            const data = await remoteScan();
-
-            // Show captured image preview
-            setScanPreview(getRpiImageUrl());
-            setScanIngredients(data.ingredients_detected || []);
-
-            // Navigate to recipes with results from RPi
-            const recipes = data.recipes?.recipes || [];
-            const ready = recipes.filter(r => r.readiness === 'READY');
-            const almost = recipes.filter(r => r.readiness === 'ALMOST_THERE');
-            const shopping = recipes.filter(r => r.readiness === 'NEED_SHOPPING');
-
-            // Short delay so user sees the scan result before navigating
-            setTimeout(() => {
-                navigate('/recipes', {
-                    state: {
-                        recommendations: {
-                            ready_to_cook: ready,
-                            almost_there: almost,
-                            need_shopping: shopping
-                        }
-                    }
-                });
-            }, 1500);
-        } catch (err) {
-            setError(err.message || 'Remote scan failed — is the RPi online?');
-        } finally {
-            setIsScanning(false);
-        }
+    const handleRemoteScan = () => {
+        // Navigate to scanning page — remote scan + animation happens there
+        navigate('/ingredients-scan', {
+            state: { mode: 'remote' }
+        });
     };
 
     const handleManualSearch = async () => {
@@ -299,38 +261,15 @@ function UploadPage() {
                                 <button
                                     className="btn btn-scan"
                                     onClick={handleRemoteScan}
-                                    disabled={isScanning || isLoading}
+                                    disabled={isLoading}
                                     id="remote-scan-btn"
                                 >
-                                    {isScanning ? (
-                                        <>
-                                            <div className="spinner" style={{ width: 20, height: 20 }}></div>
-                                            Scanning & Analyzing…
-                                        </>
-                                    ) : (
-                                        <>
-                                            Capture & Find Recipes
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                                                <circle cx="12" cy="13" r="4" />
-                                            </svg>
-                                        </>
-                                    )}
+                                    Capture & Find Recipes
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                        <circle cx="12" cy="13" r="4" />
+                                    </svg>
                                 </button>
-
-                                {scanPreview && (
-                                    <div className="scan-result fade-in">
-                                        <img src={scanPreview} alt="Scanned ingredients" className="scan-preview" />
-                                        {scanIngredients.length > 0 && (
-                                            <div className="scan-ingredients">
-                                                <span className="scan-label">Detected:</span>
-                                                {scanIngredients.map(ing => (
-                                                    <span key={ing} className="chip">{ing}</span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>

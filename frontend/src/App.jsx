@@ -4,6 +4,7 @@ import './App.css';
 import LandingPage from './pages/LandingPage';
 import UploadPage from './pages/UploadPage';
 import IngredientsPage from './pages/IngredientsPage';
+import IngredientsScanPage from './pages/IngredientsScanPage';
 import RecipesPage from './pages/RecipesPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
 import LoginPage from './pages/LoginPage';
@@ -58,6 +59,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/ingredients" element={<IngredientsPage />} />
+          <Route path="/ingredients-scan" element={<IngredientsScanPage />} />
           <Route path="/recipes" element={<RecipesPage />} />
           <Route path="/recipe" element={<RecipeDetailPage />} />
           <Route path="/login" element={<LoginPage />} />

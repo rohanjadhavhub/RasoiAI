@@ -1,0 +1,498 @@
+/* ===== Ingredients Scan Page - Storytelling + Indian Aesthetics ===== */
+
+.scan-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== Hero Section ===== */
+.chapter--scan-hero {
+    padding: 100px 0 72px;
+    background: var(--cream);
+}
+
+.chapter--scan-hero .chapter__headline {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    max-width: 720px;
+}
+
+/* ===== Scanning Animation Section ===== */
+.chapter--scanning {
+    background: var(--bg-contrast);
+    color: var(--text-on-dark);
+    padding: 80px 0;
+}
+
+.chapter--scanning .chapter__label {
+    color: var(--turmeric-light);
+}
+
+.scanning-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+/* Uploaded image preview during scan */
+.scanning-preview {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 3px solid var(--saffron);
+}
+
+.scanning-preview img {
+    width: 100%;
+    display: block;
+    border-radius: var(--radius);
+}
+
+/* Scan line sweeping animation */
+.scanning-preview::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--saffron), var(--turmeric-light), var(--saffron), transparent);
+    animation: scanSweep 2s ease-in-out infinite;
+    box-shadow: 0 0 20px var(--saffron), 0 0 40px rgba(194, 65, 12, 0.3);
+}
+
+@keyframes scanSweep {
+    0% { top: 0; }
+    50% { top: calc(100% - 4px); }
+    100% { top: 0; }
+}
+
+/* Corner brackets on the image */
+.scanning-preview::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 2px solid rgba(245, 158, 11, 0.5);
+    border-radius: 4px;
+    z-index: 1;
+    animation: bracketPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes bracketPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+/* Placeholder fridge icon for remote scan */
+.scanning-preview--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4/3;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--turmeric-light);
+}
+
+.scanning-preview--placeholder::after {
+    display: none;
+}
+
+.scanning-preview--placeholder::before {
+    display: none;
+}
+
+/* Status text beneath */
+.scanning-status {
+    text-align: center;
+}
+
+.scanning-status__title {
+    font-family: 'Archivo', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-on-dark);
+    margin-bottom: 12px;
+}
+
+.scanning-status__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.scan-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    transition: color 0.4s ease;
+}
+
+.scan-step--active {
+    color: var(--turmeric-light);
+}
+
+.scan-step--done {
+    color: var(--teal-light);
+}
+
+.scan-step__icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: background 0.4s ease;
+}
+
+.scan-step--active .scan-step__icon {
+    background: var(--turmeric);
+    color: white;
+}
+
+.scan-step--done .scan-step__icon {
+    background: var(--teal);
+    color: white;
+}
+
+/* Pulsing dot for active step */
+.scan-step--active .scan-step__icon::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+    animation: dotPulse 1s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ===== Results Section ===== */
+.chapter--scan-results {
+    background: var(--bg-page);
+    padding: 80px 0;
+}
+
+.chapter--scan-results .chapter__headline {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    margin-bottom: 16px;
+}
+
+.scan-results-wrapper {
+    max-width: 800px;
+}
+
+/* ===== Ingredients Table ===== */
+.ingredients-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 32px 0;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.ingredients-table thead {
+    background: var(--bg-warm);
+}
+
+.ingredients-table th {
+    font-family: 'Archivo', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+}
+
+.ingredients-table td {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+    transition: background 0.15s ease;
+}
+
+.ingredients-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.ingredients-table tbody tr:hover td {
+    background: var(--bg-muted);
+}
+
+/* Ingredient row animation - staggered */
+.ingredients-table tbody tr {
+    animation: rowSlide 0.4s ease-out both;
+}
+
+@keyframes rowSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.ingredient-num {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.ingredient-name {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ingredient-name__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--saffron);
+    flex-shrink: 0;
+}
+
+.ingredient-name__dot--alt {
+    background: var(--turmeric);
+}
+
+.ingredient-name__dot--accent {
+    background: var(--teal);
+}
+
+.confidence-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.confidence-bar__track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    max-width: 100px;
+}
+
+.confidence-bar__fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--saffron);
+    transition: width 0.8s ease-out;
+}
+
+.confidence-bar__fill--high {
+    background: var(--success);
+}
+
+.confidence-bar__fill--medium {
+    background: var(--turmeric);
+}
+
+.confidence-bar__fill--low {
+    background: var(--error);
+}
+
+.confidence-bar__label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 36px;
+}
+
+/* ===== Edit Controls ===== */
+.scan-edit-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.scan-edit-controls input {
+    max-width: 280px;
+}
+
+/* Remove ingredient button in table */
+.ingredient-remove {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.ingredient-remove:hover {
+    border-color: var(--error);
+    color: var(--error);
+    background: rgba(220, 38, 38, 0.06);
+}
+
+/* ===== Summary Bar ===== */
+.scan-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: var(--bg-warm);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+}
+
+.scan-summary__text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.scan-summary__text strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+/* ===== CTA Section ===== */
+.chapter--scan-cta {
+    padding: 96px 0;
+    background: var(--saffron);
+    color: var(--text-on-primary);
+    text-align: center;
+}
+
+.chapter--scan-cta .chapter__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chapter--scan-cta .chapter__headline {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    max-width: 600px;
+    color: var(--text-on-primary);
+    margin-bottom: 12px;
+}
+
+.chapter--scan-cta .chapter__body {
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.chapter--scan-cta .btn-primary {
+    background: var(--text-on-primary);
+    color: var(--saffron);
+    padding: 18px 40px;
+    font-size: 1.05rem;
+}
+
+.chapter--scan-cta .btn-primary:hover {
+    background: var(--cream);
+    color: var(--maroon);
+}
+
+/* ===== Error State ===== */
+.scan-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(220, 38, 38, 0.08);
+    border: 2px solid var(--error);
+    color: var(--error);
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    margin: 24px 0;
+    max-width: 700px;
+    font-weight: 500;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .chapter--scan-hero {
+        padding: 80px 0 56px;
+    }
+
+    .chapter--scanning {
+        padding: 56px 0;
+    }
+
+    .scanning-preview {
+        max-width: 300px;
+    }
+
+    .chapter--scan-results {
+        padding: 56px 0;
+    }
+
+    .ingredients-table th,
+    .ingredients-table td {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
+
+    .scan-summary {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .scan-edit-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .scan-edit-controls input {
+        max-width: 100%;
+    }
+
+    .chapter--scan-cta {
+        padding: 72px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .chapter--scan-hero .chapter__headline {
+        font-size: 1.8rem;
+    }
+
+    .confidence-bar__track {
+        max-width: 60px;
+    }
+
+    .chapter--scan-cta .btn-primary {
+        width: 100%;
+        padding: 16px 28px;
+        font-size: 0.95rem;
+    }
+}

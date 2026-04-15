@@ -57,6 +57,9 @@ cd rasoi_camera/
 python main.py
 # Server starts at http://0.0.0.0:8001
 ```
+# Http Tunnel
+
+ssh -N -L 8001:localhost:8001 rohanjadhav@raspberrypi.local
 
 ## API Endpoints
 

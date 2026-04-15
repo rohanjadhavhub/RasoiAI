@@ -9,8 +9,7 @@
 /* ===== Top Bar ===== */
 .rd-topbar {
     padding: 16px 0;
-    background: var(--bg-page);
-    border-bottom: 1px solid var(--border);
+    background: var(--cream);
 }
 
 /* ===== Hero / Title Section ===== */
